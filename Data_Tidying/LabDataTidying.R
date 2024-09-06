@@ -170,6 +170,51 @@ df2 |>
 ##############
 # Exercise 4 #
 ##############
+who
 
+who1 <- who |>
+  pivot_longer(
+    cols = starts_with("new"), 
+    names_to = "key", 
+    values_to = "cases",
+    values_drop_na = TRUE
+  )
 
+who1
 
+who1 %>% 
+  count(key)
+
+# replacing characters 'newrel' with 'new_rel'  to make all var names consistent
+who2 <- who1 %>% 
+  mutate(key = stringr::str_replace(key, "newrel", "new_rel"))
+who2
+
+who3 <- who2 |>
+  separate(
+    col = key,
+    into = c("new", "type", "sexage"),
+    sep = "_",
+    convert = TRUE
+  )
+
+who3
+
+who3 %>% 
+  count(new)
+
+who4 <- who3 %>% 
+  select(-new, -iso2, -iso3)
+
+who4
+
+# separate into sex and age by splitting after first character
+who5 <- who4 |>
+  separate(
+    col = sexage,
+    into = c("sex", "age"),
+    sep = 1,
+    convert = TRUE
+  )
+
+who5
