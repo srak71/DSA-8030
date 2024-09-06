@@ -15,4 +15,6 @@ say(by='cow')
 
 say("GO TIGERS!", by="chicken")
 
+say("GO BERKELEY!", by="yoda")
+
 say(paste(fortune(), collapse="\n"), by="monkey")
