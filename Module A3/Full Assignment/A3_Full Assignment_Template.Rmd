@@ -1,6 +1,6 @@
 ---
 title: "Module A3 - Full Assignment Template"
-author: "YOUR NAME HERE"
+author: "Saransh  Rakshak"
 output: html_document
 ---
 
