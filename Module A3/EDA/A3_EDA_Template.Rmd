@@ -1,0 +1,81 @@
+---
+title: "A3_EDA_Template"
+author: "YOUR NAME HERE"
+output: 
+   html_document:
+     df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, class.source="bg-success")
+```
+
+### Setup
+
+#### Loading packages
+```{r message=FALSE, warning=FALSE}
+# Load packages needed
+```
+
+#### Loans dataframe
+```{r}
+# Create condensed dataframe loans
+
+```
+
+<br>
+
+### Univariate Numerical Summary
+
+Using the `summarise` function, create a summary of the following statistics. 
+
+- median of `interest_rate`
+- IQR (function `iqr()`) of `interest_rate`
+- mean of `debt_to_income`
+- standard deviation of `debt_to_income`
+
+```{r}
+# univariate numerical summary
+
+```
+
+<br>
+
+### Categorical Summary
+
+Create a frequency table of `grade`. 
+
+```{r}
+# frequency table of grade
+
+```
+
+
+<br>
+
+### Multivariate Numerical Summary
+
+Create a summary statistics table for the following statistics grouped by `grade`
+
+- median of `interest_rate`
+- IQR (function `iqr()`) of `interest_rate`
+- mean of `debt_to_income`
+- standard deviation of `debt_to_income`
+
+
+```{r}
+# Multivariate numerical summary
+
+```
+
+<br>
+
+### Multivariate Categorical Summary
+
+Create a cross table of frequencies for `homeownership` by `grade`.  
+
+```{r}
+# Multivariable Categorical Summary 
+
+```
+
