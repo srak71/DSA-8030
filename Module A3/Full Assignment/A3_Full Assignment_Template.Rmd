@@ -1,0 +1,47 @@
+---
+title: "Module A3 - Full Assignment Template"
+author: "YOUR NAME HERE"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, class.source="bg-success")
+```
+
+
+## Load Packages Here 
+
+```{r packages, warning=FALSE, message=FALSE}
+library(tidyverse)
+```
+
+## Exercise 1 - Numerical Variable
+
+```{r}
+
+```
+
+## Exercise 2 - Categorical Variable
+
+```{r}
+
+```
+
+## Exercise 3 -  Numeric and Categorical
+
+```{r}
+
+```
+
+## Exercise 4 - Two Categorical Variables
+
+```{r}
+
+```
+
+## Exericse 5 - Highlight One Feature
+
+```{r}
+
+```
+
