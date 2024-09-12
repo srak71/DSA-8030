@@ -1,6 +1,6 @@
 ---
 title: "A3_EDA_Template"
-author: "YOUR NAME HERE"
+author: "Saransh Rakshak"
 output: 
    html_document:
      df_print: paged
@@ -15,12 +15,16 @@ knitr::opts_chunk$set(echo = TRUE, class.source="bg-success")
 #### Loading packages
 ```{r message=FALSE, warning=FALSE}
 # Load packages needed
+library(tidyverse)
+library(openintro)
 ```
 
 #### Loans dataframe
 ```{r}
 # Create condensed dataframe loans
-
+loans <- loans_full_schema %>%
+  select(loan_amount, interest_rate, term, grade, 
+         state, annual_income, homeownership, debt_to_income)
 ```
 
 <br>
@@ -36,7 +40,11 @@ Using the `summarise` function, create a summary of the following statistics.
 
 ```{r}
 # univariate numerical summary
-
+loans |>
+  summarise(median_interest_rate = median(interest_rate),
+            interest_IQR = IQR(interest_rate),
+            mean_debt_to_income = mean(debt_to_income, na.rm=TRUE),
+            sd_debt_to_income = sd(debt_to_income, na.rm=TRUE))
 ```
 
 <br>
@@ -47,7 +55,8 @@ Create a frequency table of `grade`.
 
 ```{r}
 # frequency table of grade
-
+loans |>
+  count(grade)
 ```
 
 
@@ -65,7 +74,12 @@ Create a summary statistics table for the following statistics grouped by `grade
 
 ```{r}
 # Multivariate numerical summary
-
+loans |>
+  group_by(grade) |>
+  summarize(median_interest_rate = median(interest_rate),
+            interest_IQR = IQR(interest_rate),
+            mean_debt_to_income = mean(debt_to_income, na.rm=TRUE),
+            sd_debt_to_income = sd(debt_to_income, na.rm=TRUE))
 ```
 
 <br>
@@ -76,6 +90,8 @@ Create a cross table of frequencies for `homeownership` by `grade`.
 
 ```{r}
 # Multivariable Categorical Summary 
-
+loans |>
+  group_by(homeownership) |>
+  count(grade)
 ```
 
