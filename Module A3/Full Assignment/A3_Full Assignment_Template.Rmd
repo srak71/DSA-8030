@@ -1,47 +1,191 @@
 ---
-title: "Module A3 - Full Assignment Template"
+title: "Module A3 - Full Assignment"
 author: "Saransh  Rakshak"
+date: "Due 9/16/24"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{R setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, class.source="bg-success")
 ```
 
 
 ## Load Packages Here 
 
-```{r packages, warning=FALSE, message=FALSE}
+```{R packages, warning=FALSE, message=FALSE}
 library(tidyverse)
+library(ggplot2movies)
+library(gghighlight)
+library(knitr)
 ```
+
+```{R}
+glimpse(movies)
+```
+
+<br>
 
 ## Exercise 1 - Numerical Variable
 
-```{r}
+- Pick a single numerical variable and make a histogram of it. Be sure to provide labels and a title for the histogram.
 
+```{R}
+ggplot(movies, aes(x = rating)) +
+  geom_histogram(binwidth = 0.3) +
+  labs(
+    x = "Rating",
+    y = "Frequency",
+    title = "Frequency of Movie Ratings"
+  )
 ```
+
+- Identify the shape of the distribution of your chosen variable.
+
+Based on the binwidth=0.3 histogram, we can see the distribution of movie rating to be unimodal and moderately left skewed.
+
+
+- Provide a summary of the mean, standard deviation, minimum, and maximum vales of the numerical variable your choose.
+
+```{R}
+ratings_table <- movies |>
+  summarise(mean_rating = mean(rating),
+            sd_rating = sd(rating),
+            lowest_rating = min(rating),
+            highest_rating = max(rating))
+
+kable(ratings_table,
+      caption = "Summary Statistics for Rating",
+      col.names = c("Mean", "Standard Deviation", "Lowest", "Highest"))
+```
+
+
+
+<br>
 
 ## Exercise 2 - Categorical Variable
 
-```{r}
+- Pick a single categorical variable and make a bar chart of it. 
+- Be sure to provide appropriate labels and a title for the bar plot.
 
+```{R}
+mpaa_rated <- movies %>% filter(mpaa != "")
+
+ggplot(mpaa_rated, aes(x = mpaa)) +
+  geom_bar() +
+    labs(
+    x = "MPAA Rating", 
+    y = "Count",
+    title = "Frequency Chart of MPAA Rating"
+    )
 ```
+
+- Provide a frequency table of the categorical variable you chose.
+
+```{R}
+kable(table(mpaa_rated$mpaa),
+      caption = "Frequency of MPAA Ratings",
+      col.names = c("MPAA Rating", "Frequency"))
+```
+
+
+
+<br>
 
 ## Exercise 3 -  Numeric and Categorical
 
-```{r}
+- Pick a numerical variable and a categorical variable and make a graph (you pick the type!) to visualize the relationship between the two variables. 
+- Provide appropriate labels and titles to your graph.
 
+```{R}
+ggplot(mpaa_rated, aes(x = year, fill = mpaa)) +
+  geom_bar() +
+    labs(
+    x="Year", 
+    y= "Count",
+    title= "Number of movie releases per year",
+    subtitle = "by MPAA Rating"
+  )
 ```
+
+
+
+
+<br>
 
 ## Exercise 4 - Two Categorical Variables
 
-```{r}
+- Pick two categorical variables and make a visualization to visualize the relationship between the two variables. 
+- Provide appropriate labels and titles to your graph.
 
+```{R}
+combined_mpaa_movies <- mpaa_rated %>%
+  pivot_longer(cols = c(Action, Animation, Comedy, Drama, Documentary, Romance, Short), names_to = "genre", values_to = "is_genre") %>%
+  filter(is_genre == 1) %>%
+  select(-is_genre)
+
+ggplot(combined_mpaa_movies, aes(x = genre, fill = mpaa)) +
+  geom_bar() +
+    labs(
+    x="Genre", 
+    y= "Count",
+    title= "Number of movie releases per genre",
+    subtitle = "by MPAA Rating"
+  )
 ```
+
+- Provide a cross table of frequency for your two chosen categorical variables.
+
+```{R}
+genre_mpaa_freq <- combined_mpaa_movies |>
+  group_by(genre) |>
+  count(mpaa)
+
+kable(genre_mpaa_freq,
+      caption = "Cross Table of Frequency for MPAA Rating and Genre",
+      col.names = c("Genre", "MPAA Rating", "Frequency"))
+```
+
+
+
+
+<br>
 
 ## Exericse 5 - Highlight One Feature
 
-```{r}
+- Create a graph that uses color to highlight (using gghightlight) one or more aspect(s) of the graph.
+- The other variables in the graph should be greyed out.
+- Provide appropriate labels and titles to your graph.
 
+```{R, message=FALSE}
+
+movies_genre <- movies %>%
+  pivot_longer(cols = c(Action, Animation, Comedy, Drama, Documentary, Romance, Short), names_to = "genre", values_to = "is_genre") %>%
+  filter(is_genre == 1 & !is.na(budget) & budget > 0) %>%
+  select(-is_genre)
+
+
+genre_mean_budget <- movies_genre |>
+  group_by(genre, year) |>
+  summarise(mean_budget = mean(budget, na.rm = TRUE))
+
+
+ggplot(data = genre_mean_budget) +
+  geom_line(aes(x = year, y = mean_budget, color = genre)) +
+  labs(
+    x = "Year",
+    y = "Mean Budget ($USD)",
+    title = "Mean Budget by Year for each Genre"
+  ) +
+  scale_y_continuous(labels = scales::comma) +
+  gghighlight(max(mean_budget) > 30000000)
 ```
+
+- Provide a story with this graph (a brief explanation about the graph and what it shows.)
+
+From our graph we can observe that Romance genre movies were the first genre to receive a mean budget of over 30 million. 
+We can also see that Animation genre movies have the highest frequency of mean budget being over 30 million, that is, Animation movies recieved a budget of over 30 million more years than any other genre.
+Action genre movies received the second highest number of years when mean budget received was over 30 million.
+And lastly, even though Romance genre movies were the first to receive mean budgets over 30 million, they had the least frequency (least amount of years) that the mean budget they recieved was over 30 million.
+
+
 
