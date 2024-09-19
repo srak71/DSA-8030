@@ -1,0 +1,101 @@
+---
+title: "A4: Full Assignment Template"
+author: "YOUR NAME HERE"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, class.source="bg-success")
+```
+
+```{r message=FALSE, warning=FALSE}
+# load packages
+
+```
+
+
+## Exericse 1
+
+### Import `enrollment` and `survey` datasets
+
+```{r include=FALSE}
+# Import enrollment and survey datasets
+
+```
+
+<br>
+
+### Joining the `enrollment` and `survey` data so that you have a list of the students in the class with their survey responses.
+
+```{r}
+
+```
+
+<br>
+
+### Using a join function to provide a list of students that did not fill out the survey.
+
+```{r}
+
+```
+
+<br>
+
+### Using a join function to provide a list of students that filled out the survey but have dropped the course.
+
+```{r}
+
+```
+
+<br>
+
+
+## Exercise 2
+
+### Import `purchases` and `prices` datasets
+
+```{r include=FALSE}
+# Import purchases and prices datasets
+
+```
+
+### Joining the `purchases` and `prices` datasets to obtain a list purchases with their prices. 
+
+```{r}
+
+```
+
+<br>
+
+### Using the join functions and the `summarize` function to obtain an amount of total revenue for purchases. 
+
+```{r}
+
+```
+
+<br>
+
+### The total revenue per customer
+
+```{r}
+
+```
+
+
+*** 
+
+## Exercise 3
+
+### Use some of the skills learned in Module A4 to create a line graph for 4 different carriers of Arrival Delays over 12 months.
+
+```{r}
+# Your code for Exercise 3 here
+
+
+
+
+```
+
+
+

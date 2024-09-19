@@ -1,0 +1,75 @@
+---
+title: "A4 - Logical Vectors Assignment"
+author: "Saransh Rakshak"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, class.source="bg-success")
+```
+
+# Loading Packages
+
+```{r warning=FALSE, message=FALSE}
+library(tidyverse)
+#Load any additional packages
+
+
+```
+
+# Dataset
+
+```{r}
+# Display flights dataset
+flights
+
+```
+
+
+# filter()
+
+<br>
+
+## Flights that had an arrival delay of two or more hours
+
+```{r}
+
+```
+
+
+
+## Flights that Flew to Houston (IAH or HOU)
+
+```{r}
+
+```
+
+
+## Flights that were operated by United, American, or Delta
+
+```{r}
+
+```
+
+
+## Flights that Departed in summer (July, August, and September)
+
+```{r}
+
+```
+
+## Flights that arrived more than two hours late, but didn’t leave late
+
+```{r}
+
+```
+
+
+## Flights that Were delayed by at least an hour, but made up over 30 minutes in flight
+
+```{r}
+
+
+```
+
+
