@@ -1,6 +1,6 @@
 ---
 title: "A4: Full Assignment Template"
-author: "YOUR NAME HERE"
+author: "Saransh Rakshak"
 output: html_document
 ---
 
@@ -11,9 +11,11 @@ knitr::opts_chunk$set(echo = TRUE, class.source="bg-success")
 
 ```{r message=FALSE, warning=FALSE}
 # load packages
-
+library(tidyverse)
+library(dplyr)
+library(nycflights13)
+library(ggplot2)
 ```
-
 
 ## Exericse 1
 
@@ -21,7 +23,13 @@ knitr::opts_chunk$set(echo = TRUE, class.source="bg-success")
 
 ```{r include=FALSE}
 # Import enrollment and survey datasets
+enrollment <- read.csv("enrollment.csv")
+survey <- read.csv("survey.csv")
+```
 
+```{R}
+glimpse(enrollment)
+glimpse(survey)
 ```
 
 <br>
@@ -29,7 +37,10 @@ knitr::opts_chunk$set(echo = TRUE, class.source="bg-success")
 ### Joining the `enrollment` and `survey` data so that you have a list of the students in the class with their survey responses.
 
 ```{r}
+student_surveys <- enrollment %>%
+  left_join(survey, by = "id")
 
+student_surveys
 ```
 
 <br>
@@ -37,7 +48,13 @@ knitr::opts_chunk$set(echo = TRUE, class.source="bg-success")
 ### Using a join function to provide a list of students that did not fill out the survey.
 
 ```{r}
+no_survey <- left_join(enrollment, survey, by = "id") %>%
+  filter(is.na(username)) %>%
+  select(id, name.x) %>%
+  rename(name = name.x)
 
+# View the result
+no_survey
 ```
 
 <br>
@@ -45,7 +62,12 @@ knitr::opts_chunk$set(echo = TRUE, class.source="bg-success")
 ### Using a join function to provide a list of students that filled out the survey but have dropped the course.
 
 ```{r}
+dropped_surveyed <- right_join(enrollment, survey, by = "id") %>%
+  filter(is.na(name.x)) %>%
+  select(id, name.y, username) %>%
+  rename(name = name.y)
 
+dropped_surveyed
 ```
 
 <br>
@@ -57,13 +79,21 @@ knitr::opts_chunk$set(echo = TRUE, class.source="bg-success")
 
 ```{r include=FALSE}
 # Import purchases and prices datasets
+purchases <- read.csv("purchases.csv")
+prices <- read.csv("prices.csv")
+```
 
+```{R}
+glimpse(purchases)
+glimpse(prices)
 ```
 
 ### Joining the `purchases` and `prices` datasets to obtain a list purchases with their prices. 
 
 ```{r}
+purchase_prices <- left_join(purchases, prices, by = "item")
 
+purchase_prices
 ```
 
 <br>
@@ -71,7 +101,10 @@ knitr::opts_chunk$set(echo = TRUE, class.source="bg-success")
 ### Using the join functions and the `summarize` function to obtain an amount of total revenue for purchases. 
 
 ```{r}
+total_revenue <- purchase_prices %>%
+  summarise(total_revenue = sum(price, na.rm = TRUE))
 
+total_revenue
 ```
 
 <br>
@@ -79,7 +112,11 @@ knitr::opts_chunk$set(echo = TRUE, class.source="bg-success")
 ### The total revenue per customer
 
 ```{r}
+cust_total_revenue <- purchase_prices %>%
+  group_by(customer_id) %>%
+  summarise(total_revenue = sum(price, na.rm = TRUE))
 
+cust_total_revenue
 ```
 
 
@@ -92,8 +129,26 @@ knitr::opts_chunk$set(echo = TRUE, class.source="bg-success")
 ```{r}
 # Your code for Exercise 3 here
 
+flights_summary <- flights %>%
+  filter(carrier %in% c("AA", "DL", "UA", "WN")) %>%
+  group_by(carrier, month) %>%
+  summarise(
+    count = n(),
+    mean_arrival_delay = mean(arr_delay, na.rm = TRUE)
+    ) %>%
+  mutate(month = factor(month.name[month], levels = month.name))
 
-
+ggplot(data = flights_summary, aes(x = month, y = mean_arrival_delay, group = carrier)) +
+  geom_line(aes(color = carrier)) +
+  geom_point(aes(color = carrier)) +
+  labs(
+    title = "Comparison of Arrival Delays over months for 4 carriers",
+    subtitle = "AA (American Airlines), DL (Delta), UA (United), WN (Southwest)",
+    x = "Month",
+    y = "Mean Arrival Delay",
+    color = "Carrier"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
 
 ```
 

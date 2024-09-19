@@ -1,6 +1,6 @@
 ---
 title: "A4: Strings and Regular Expressions - Template"
-author: "YOUR NAME HERE"
+author: "Saransh Rakshak"
 output: html_document
 ---
 
@@ -8,13 +8,18 @@ output: html_document
 
 ```{r warning=FALSE, message=FALSE}
 #load packages
-
+library(tidyverse)
+library(dbplyr)
+library(stringr)
+library(tidyr)
 ```
 
 __1. Create a regular expression to find (create a subset of) all words that start with "y". __
 
 
 ```{r}
+start_with_y <- str_subset(words, "^y")
+start_with_y
 ```
 
 <br>
@@ -23,7 +28,8 @@ __1. Create a regular expression to find (create a subset of) all words that sta
 __2. Create a regular expression to find (create a subset of) all words that end with "x". __
 
 ```{r}
-
+end_with_x <- str_subset(words, "x$")
+end_with_x
 ```
 
 <br>
@@ -32,7 +38,8 @@ __2. Create a regular expression to find (create a subset of) all words that end
 __3. Create a regular expression to find (create a subset of) all words that have exactly 3 letters. __
 
 ```{r}
-
+words_3_chars <- str_subset(words, "^.{3}$")
+words_3_chars
 ```
 
 <br>
@@ -41,7 +48,8 @@ __4. Create a regular expression to find (create a subset of) all words that hav
 
 
 ```{r}
-
+seven_or_more_letters <- str_subset(words, "^.{7,}$")
+seven_or_more_letters
 ```
 
 <br>
@@ -50,7 +58,8 @@ __4. Create a regular expression to find (create a subset of) all words that hav
 __5. Create a regular expression to find (create a subset of) all words that start with a vowel. __
  
 ```{r}
-
+words_starting_with_vowel <- str_subset(words, "^[aeiouAEIOU]")
+words_starting_with_vowel
 ```
 
 <br>
@@ -59,7 +68,8 @@ __5. Create a regular expression to find (create a subset of) all words that sta
 __6. Create a regular expression to find (create a subset of) all words that end in `ing` or `ise`. Hint: use parentheses `()` to include and/or statement. __
 
 ```{r}
-
+words_ending_ing_ise <- str_subset(words, "(ing|ise)$")
+words_ending_ing_ise
 ```
 
 <br>
@@ -69,7 +79,8 @@ __7. Create a regular expression to find (create a subset of) all words that sta
 
 
 ```{r}
-
+words_starting_with_3_consonants <- str_subset(words, "^[^aeiouAEIOU]{3}")
+words_starting_with_3_consonants
 ```
 
 <br>
@@ -79,7 +90,8 @@ __8. Replace all a's in `words` with an underscore `_`.  (using `head` function 
 
 
 ```{r}
-
+words_with_underscores <- str_replace_all(words, "a", "_")
+head(words_with_underscores, 15)
 ```
 
 <br>
@@ -87,7 +99,8 @@ __8. Replace all a's in `words` with an underscore `_`.  (using `head` function 
 __9. Using the `billboard` tibble from `tidyr` (part of `tidyverse`), create a subset of the songs (tracks) in the top 100 in the year 2000 (all songs in the `billboard` tibble are from the year 2000) that contain the word "Love".__
 
 ```{r}
-
+love_songs <- billboard %>% filter(str_detect(track, "Love"))
+love_songs
 ```
 
 <br>
@@ -95,7 +108,9 @@ __9. Using the `billboard` tibble from `tidyr` (part of `tidyverse`), create a s
 __10. Using the `billboard` tibble, for the song tracks replace all the words "Love" with "LOVE". Only return those tracks that have the word replaced.  (Hint: you may have to do this is two or more steps OR you can use piping)__
 
 ```{r}
-
+billboard %>%
+  filter(str_detect(track, "Love")) %>%
+  mutate(track = str_replace_all(track, "Love", "LOVE"))
 ```
 
 

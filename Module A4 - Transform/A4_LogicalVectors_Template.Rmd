@@ -12,8 +12,9 @@ knitr::opts_chunk$set(echo = TRUE, class.source="bg-success")
 
 ```{r warning=FALSE, message=FALSE}
 library(tidyverse)
+library(dbplyr)
 #Load any additional packages
-
+library(nycflights13)
 
 ```
 
@@ -22,7 +23,6 @@ library(tidyverse)
 ```{r}
 # Display flights dataset
 flights
-
 ```
 
 
@@ -33,7 +33,7 @@ flights
 ## Flights that had an arrival delay of two or more hours
 
 ```{r}
-
+flights %>% filter(arr_delay >= 120)
 ```
 
 
@@ -41,35 +41,34 @@ flights
 ## Flights that Flew to Houston (IAH or HOU)
 
 ```{r}
-
+flights %>% filter(dest %in% c("IAH", "HOU"))
 ```
 
 
 ## Flights that were operated by United, American, or Delta
 
 ```{r}
-
+flights %>% filter(carrier %in% c("UA", "AA", "DL"))
 ```
 
 
 ## Flights that Departed in summer (July, August, and September)
 
 ```{r}
-
+flights %>% filter(month %in% c(7, 8, 9))
 ```
 
 ## Flights that arrived more than two hours late, but didn’t leave late
 
 ```{r}
-
+flights %>% filter(arr_delay >= 120 & dep_delay <= 0)
 ```
 
 
 ## Flights that Were delayed by at least an hour, but made up over 30 minutes in flight
 
 ```{r}
-
-
+flights %>% filter(dep_delay >= 60 & arr_delay < dep_delay - 30)
 ```
 
 
