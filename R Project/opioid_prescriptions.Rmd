@@ -125,7 +125,8 @@ dfSummary(merged)
 ```{R}
 ggplot(merged, aes(x = zip_avg_income)) +
   geom_histogram(binwidth = 10000, fill = "green", color = "black") +
-  labs(title = "Distribution of Average Income", x = "Average Income", y = "Frequency")
+  labs(title = "Distribution of Average Income
+       ", x = "Average Income", y = "Frequency")
 
 
 ggplot(merged, aes(x = zip_avg_income, y = op_cnt)) +
