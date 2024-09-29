@@ -1,0 +1,138 @@
+---
+title: "Opioid Prescription Trends"
+author: "Saransh Rakshak"
+output: html_document
+date: "Due October 21, 2024"
+---
+
+```{r setup, include=FALSE}
+library(dplyr)
+library(ggplot2)
+library(summarytools)
+```
+
+```{R}
+scripts <- read.csv("data/op_2021_data.csv")
+scripts <- scripts %>%
+  rename(last_name = NPPES.Provider.Last.Name,
+         first_name = NPPES.Provider.First.Name,
+         zip_code = NPPES.Provider.ZIP.Code,
+         state = NPPES.Provider.State,
+         doc_spec = Specialty.Description,
+         tot_presc_cnt = Total.Claim.Count,
+         op_cnt =  Opioid.Claim.Count,
+         op_rate = Opioid.Prescribing.Rate,
+         LA_op_cnt = Long.Acting.Opioid.Claim.Count,
+         LA_op_rate = Long.Acting.Opioid.Prescribing.Rate)
+
+income <- read.csv("data/IRSIncomeByZipCode.csv")
+income <- income %>% 
+  rename(state = STATE,
+         zip_code = ZIPCODE,
+         num_tax_ret = `Number.of.returns`,
+         zip_agi = `Adjusted.gross.income..AGI.`,
+         zip_avg_agi = `Avg.AGI`,
+         ret_w_total = `Number.of.returns.with.total.income`,
+         sum_zip_income = `Total.income.amount`,
+         zip_avg_income = `Avg.total.income`,
+         num_ret_taxable = `Number.of.returns.with.taxable.income`,
+         taxable_amt = `Taxable.income.amount`,
+         avg_taxable = `Avg.taxable.income`)
+
+
+glimpse(scripts)
+glimpse(income)
+```
+
+The scripts dataset contains the following values:
+
+    - NPI:  National Provider Identifier for Doctor Identification.
+    - last_name, first_name: Prescribing Doctor's last and first name.
+    - zip_code: Zip code of prescriber.
+    - state: State of prescriber.
+    - doc_spec: Specialty of Doctor (ex. Anesthesiology, Internal Medicine, Dentist, etc.)
+    - tot_presc_cnt: Total amount of prescriptions by the doctor (inclusive of non-opioids)
+    - op_cnt: Amount of opioid prescriptions by the doctor.
+    - op_rate: Changes in the amount of opioid prescriptions over time by the doctor.
+    - LA_op_cnt: Amount of Long-Acting opioid prescriptions by the doctor.
+    - LA_op_rate: Changes in the amount of Long-Acting opioid prescriptions over time by the doctor.
+    
+  
+The income dataset contains the following values:
+
+    - state: The state the zip code is located in.
+    - zip_code: Zip code.
+    - num_tax_ret: The number of tax returns filed in 2016.
+    - zip_agi: Adjusted gross income for residents in a zip.
+    - ret_w_total: Number of income tax returns with total income.
+    - sum_zip_income: Summation of all incomes of residents in a zip code.
+    - avg_income: Average income of residents in a zip code, in the thousands. (i.e. 52.3 = \$52,300 earned, on average, by residents in a shared zip code)
+    - num_ret_taxable: Number of income tax returns with taxable income.
+    - taxable_amt: Summation of the total amount a zip can be taxed.
+    - avg_taxable: Average total taxable income for each area code, in the thousands. (i.e. 40.76 = \$40,760 income tax paid by that zip code in 2016)
+    
+  
+## Cleaning up dataframe scripts.
+```{R}
+# Selecting relevant columns
+scripts <- scripts %>%
+  select(zip_code, state, doc_spec, op_cnt, op_rate, LA_op_cnt, LA_op_rate)
+
+# Removing doctors who have not prescribed any opioids
+scripts <- scripts %>%
+  filter(op_cnt > 0)
+
+# Replacing NA values in LA_op_cnt and LA_op_rate with 0
+scripts$LA_op_cnt[is.na(scripts$LA_op_cnt)] <- 0
+scripts$LA_op_rate[is.na(scripts$LA_op_rate)] <- 0
+
+# Turning double LA_op_cnt to int
+scripts$LA_op_cnt <- as.integer(scripts$LA_op_cnt)
+
+scripts
+```
+
+
+## Cleaning up dataframe income.
+```{R}
+# Selecting relevant columns
+income <- income %>%
+  select(state, zip_code, zip_avg_income)
+
+# Removing rows where zip_code does not have 5 digits
+income <- income %>%
+  filter(nchar(as.character(zip_code)) == 5)
+
+income$zip_avg_income <- income$zip_avg_income * 1000
+
+income
+```
+
+## Merging the two dataframes.
+
+```{R}
+# Merging by zip_code and state
+merged <- scripts %>%
+  left_join(income, by = c("state", "zip_code"))
+
+merged <- merged %>%
+  filter(zip_avg_income <= 200000.00,
+         op_cnt < 1000)
+merged
+dfSummary(merged)
+```
+
+```{R}
+ggplot(merged, aes(x = zip_avg_income)) +
+  geom_histogram(binwidth = 10000, fill = "green", color = "black") +
+  labs(title = "Distribution of Average Income", x = "Average Income", y = "Frequency")
+
+
+ggplot(merged, aes(x = zip_avg_income, y = op_cnt)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", col = "red") +
+  labs(title = "Opioid Prescription Count vs. Average Income", x = "Average Income", y = "Opioid Prescription Count")
+
+```
+
+
