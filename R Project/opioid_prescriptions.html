@@ -351,7 +351,7 @@ display: none;
 
 <h1 class="title toc-ignore">Opioid Prescription Trends</h1>
 <h4 class="author">Saransh Rakshak</h4>
-<h4 class="date">Due October 21, 2024</h4>
+<h4 class="date">Due: October 21, 2024</h4>
 
 </div>
 
@@ -369,7 +369,60 @@ scripts &lt;- scripts %&gt;%
          LA_op_cnt = Long.Acting.Opioid.Claim.Count,
          LA_op_rate = Long.Acting.Opioid.Prescribing.Rate)
 
-income &lt;- read.csv(&quot;data/IRSIncomeByZipCode.csv&quot;)
+# Selecting relevant columns
+scripts &lt;- scripts %&gt;%
+  select(zip_code, state, doc_spec, op_cnt, op_rate, LA_op_cnt, LA_op_rate)
+
+# Removing doctors who have not prescribed any opioids
+scripts &lt;- scripts %&gt;%
+  filter(op_cnt &gt; 0)
+
+# Replacing NA values in LA_op_cnt and LA_op_rate with 0
+scripts$LA_op_cnt[is.na(scripts$LA_op_cnt)] &lt;- 0
+scripts$LA_op_rate[is.na(scripts$LA_op_rate)] &lt;- 0
+
+# Turning double LA_op_cnt to int
+scripts$LA_op_cnt &lt;- as.integer(scripts$LA_op_cnt)
+
+glimpse(scripts)</code></pre>
+<pre><code>## Rows: 411,086
+## Columns: 7
+## $ zip_code   &lt;int&gt; 21502, 43623, 15825, 80045, 32725, 18951, 74104, 40212, 806…
+## $ state      &lt;chr&gt; &quot;MD&quot;, &quot;OH&quot;, &quot;PA&quot;, &quot;CO&quot;, &quot;FL&quot;, &quot;PA&quot;, &quot;OK&quot;, &quot;KY&quot;, &quot;CO&quot;, &quot;CA&quot;,…
+## $ doc_spec   &lt;chr&gt; &quot;Internal Medicine&quot;, &quot;Anesthesiology&quot;, &quot;Family Practice&quot;, &quot;…
+## $ op_cnt     &lt;int&gt; 13, 891, 22, 12, 73, 133, 142, 170, 21, 1985, 16, 158, 51, …
+## $ op_rate    &lt;dbl&gt; 0.03, 0.49, 0.01, 0.29, 0.01, 0.02, 0.12, 0.02, 0.08, 0.58,…
+## $ LA_op_cnt  &lt;int&gt; 0, 143, 0, 0, 0, 27, 0, 0, 0, 536, 0, 0, 0, 0, 93, 0, 0, 0,…
+## $ LA_op_rate &lt;dbl&gt; 0.00, 0.16, 0.00, 0.00, 0.00, 0.20, 0.00, 0.00, 0.00, 0.27,…</code></pre>
+<pre class="r"><code>summary(scripts)</code></pre>
+<pre><code>##     zip_code        state             doc_spec             op_cnt       
+##  Min.   :    0   Length:411086      Length:411086      Min.   :   11.0  
+##  1st Qu.:27704   Class :character   Class :character   1st Qu.:   21.0  
+##  Median :47807   Mode  :character   Mode  :character   Median :   46.0  
+##  Mean   :50420                                         Mean   :  146.2  
+##  3rd Qu.:77375                                         3rd Qu.:  124.0  
+##  Max.   :99929                                         Max.   :31029.0  
+##  NA&#39;s   :72                                                             
+##     op_rate         LA_op_cnt         LA_op_rate     
+##  Min.   :0.0000   Min.   :   0.00   Min.   :0.00000  
+##  1st Qu.:0.0300   1st Qu.:   0.00   1st Qu.:0.00000  
+##  Median :0.0800   Median :   0.00   Median :0.00000  
+##  Mean   :0.1628   Mean   :  16.89   Mean   :0.04036  
+##  3rd Qu.:0.2300   3rd Qu.:   0.00   3rd Qu.:0.00000  
+##  Max.   :1.0000   Max.   :6635.00   Max.   :1.00000  
+## </code></pre>
+<p>The scripts dataset contains the following values:</p>
+<pre><code>- NPI:  National Provider Identifier for Doctor Identification.
+- last_name, first_name: Prescribing Doctor&#39;s last and first name.
+- zip_code: Zip code of prescriber.
+- state: State of prescriber.
+- doc_spec: Specialty of Doctor (ex. Anesthesiology, Internal Medicine, Dentist, etc.)
+- tot_presc_cnt: Total amount of prescriptions by the doctor (inclusive of non-opioids)
+- op_cnt: Amount of opioid prescriptions by the doctor.
+- op_rate: Changes in the amount of opioid prescriptions over time by the doctor.
+- LA_op_cnt: Amount of Long-Acting opioid prescriptions by the doctor.
+- LA_op_rate: Changes in the amount of Long-Acting opioid prescriptions over time by the doctor.</code></pre>
+<pre class="r"><code>income &lt;- read.csv(&quot;data/IRSIncomeByZipCode.csv&quot;)
 income &lt;- income %&gt;% 
   rename(state = STATE,
          zip_code = ZIPCODE,
@@ -383,61 +436,70 @@ income &lt;- income %&gt;%
          taxable_amt = `Taxable.income.amount`,
          avg_taxable = `Avg.taxable.income`)
 
+# Selecting relevant columns
+income &lt;- income %&gt;%
+  select(state, zip_code, zip_avg_income)
 
-glimpse(scripts)</code></pre>
-<pre><code>## Rows: 1,048,575
-## Columns: 11
-## $ NPI           &lt;int&gt; 1003000126, 1003000142, 1003000167, 1003000282, 10030004…
-## $ last_name     &lt;chr&gt; &quot;ENKESHAFI&quot;, &quot;KHALIL&quot;, &quot;ESCOBAR&quot;, &quot;BLAKEMORE&quot;, &quot;GIRARDI&quot;…
-## $ first_name    &lt;chr&gt; &quot;ARDALAN&quot;, &quot;RASHID&quot;, &quot;JULIO&quot;, &quot;ROSIE&quot;, &quot;DAVID&quot;, &quot;JENNIFE…
-## $ zip_code      &lt;int&gt; 21502, 43623, 89403, 37243, 15825, 44106, 80045, 32725, …
-## $ state         &lt;chr&gt; &quot;MD&quot;, &quot;OH&quot;, &quot;NV&quot;, &quot;TN&quot;, &quot;PA&quot;, &quot;OH&quot;, &quot;CO&quot;, &quot;FL&quot;, &quot;PA&quot;, &quot;O…
-## $ doc_spec      &lt;chr&gt; &quot;Internal Medicine&quot;, &quot;Anesthesiology&quot;, &quot;Dentist&quot;, &quot;Nurse…
-## $ tot_presc_cnt &lt;int&gt; 492, 1818, 77, 100, 2766, 221, 41, 5011, 6782, 1177, 15,…
-## $ op_cnt        &lt;int&gt; 13, 891, NA, 0, 22, NA, 12, 73, 133, 142, 0, NA, NA, 0, …
-## $ op_rate       &lt;dbl&gt; 0.03, 0.49, NA, 0.00, 0.01, NA, 0.29, 0.01, 0.02, 0.12, …
-## $ LA_op_cnt     &lt;int&gt; NA, 143, 0, 0, NA, 0, 0, 0, 27, NA, 0, 0, 0, 0, NA, 0, 0…
-## $ LA_op_rate    &lt;dbl&gt; NA, 0.16, NA, NA, NA, NA, 0.00, 0.00, 0.20, NA, NA, NA, …</code></pre>
-<pre class="r"><code>glimpse(income)</code></pre>
-<pre><code>## Rows: 27,790
-## Columns: 11
-## $ state           &lt;chr&gt; &quot;AL&quot;, &quot;AL&quot;, &quot;AL&quot;, &quot;AL&quot;, &quot;AL&quot;, &quot;AL&quot;, &quot;AL&quot;, &quot;AL&quot;, &quot;AL&quot;, …
-## $ zip_code        &lt;int&gt; 0, 35004, 35005, 35006, 35007, 35010, 35014, 35016, 35…
-## $ num_tax_ret     &lt;int&gt; 2022380, 4930, 3300, 1230, 11990, 8320, 1610, 7030, 93…
-## $ zip_agi         &lt;int&gt; 105089761, 255534, 128387, 58302, 643708, 378497, 6720…
-## $ zip_avg_agi     &lt;dbl&gt; 51.96341, 51.83245, 38.90515, 47.40000, 53.68707, 45.4…
-## $ ret_w_total     &lt;int&gt; 2022380, 4930, 3300, 1230, 11990, 8320, 1610, 7030, 93…
-## $ sum_zip_income  &lt;int&gt; 106420533, 258024, 129390, 58585, 651350, 382106, 6788…
-## $ zip_avg_income  &lt;dbl&gt; 52.62143, 52.33753, 39.20909, 47.63008, 54.32444, 45.9…
-## $ num_ret_taxable &lt;int&gt; 1468370, 4020, 2440, 940, 9280, 5610, 1180, 5080, 650,…
-## $ taxable_amt     &lt;int&gt; 67850874, 163859, 70760, 36341, 414878, 226514, 38277,…
-## $ avg_taxable     &lt;dbl&gt; 46.20829, 40.76095, 29.00000, 38.66064, 44.70668, 40.3…</code></pre>
-<p>The scripts dataset contains the following values:</p>
-<pre><code>- NPI:  National Provider Identifier for Doctor Identification.
-- last_name, first_name: Prescribing Doctor&#39;s last and first name.
-- zip_code: Zip code of prescriber.
-- state: State of prescriber.
-- doc_spec: Specialty of Doctor (ex. Anesthesiology, Internal Medicine, Dentist, etc.)
-- tot_presc_cnt: Total amount of prescriptions by the doctor (inclusive of non-opioids)
-- op_cnt: Amount of opioid prescriptions by the doctor.
-- op_rate: Changes in the amount of opioid prescriptions over time by the doctor.
-- LA_op_cnt: Amount of Long-Acting opioid prescriptions by the doctor.
-- LA_op_rate: Changes in the amount of Long-Acting opioid prescriptions over time by the doctor.</code></pre>
+income$zip_avg_income &lt;- income$zip_avg_income * 1000
+
+# Removing rows where zip_code does not have 5 digits or 99999 zip codes
+income &lt;- income %&gt;%
+  filter(nchar(as.character(zip_code)) == 5) %&gt;%
+  filter(zip_code != 99999)
+
+glimpse(income)</code></pre>
+<pre><code>## Rows: 25,495
+## Columns: 3
+## $ state          &lt;chr&gt; &quot;AL&quot;, &quot;AL&quot;, &quot;AL&quot;, &quot;AL&quot;, &quot;AL&quot;, &quot;AL&quot;, &quot;AL&quot;, &quot;AL&quot;, &quot;AL&quot;, &quot;…
+## $ zip_code       &lt;int&gt; 35004, 35005, 35006, 35007, 35010, 35014, 35016, 35019,…
+## $ zip_avg_income &lt;dbl&gt; 52337.53, 39209.09, 47630.08, 54324.44, 45926.20, 42164…</code></pre>
+<pre class="r"><code>summary(income)</code></pre>
+<pre><code>##     state              zip_code     zip_avg_income   
+##  Length:25495       Min.   :10001   Min.   :   8841  
+##  Class :character   1st Qu.:31770   1st Qu.:  41123  
+##  Mode  :character   Median :52210   Median :  48753  
+##                     Mean   :52625   Mean   :  56658  
+##                     3rd Qu.:72329   3rd Qu.:  60174  
+##                     Max.   :99901   Max.   :1831838</code></pre>
 <p>The income dataset contains the following values:</p>
 <pre><code>- state: The state the zip code is located in.
-- zip_code: Zip code.
-- num_tax_ret: The number of tax returns filed in 2016.
-- zip_agi: Adjusted gross income for residents in a zip.
-- ret_w_total: Number of income tax returns with total income.
-- sum_zip_income: Summation of all incomes of residents in a zip code.
-- avg_income: Average income of residents in a zip code, in the thousands. (i.e. 52.3 = \$52,300 earned, on average, by residents in a shared zip code)
-- num_ret_taxable: Number of income tax returns with taxable income.
-- taxable_amt: Summation of the total amount a zip can be taxed.
-- avg_taxable: Average total taxable income for each area code, in the thousands. (i.e. 40.76 = \$40,760 income tax paid by that zip code in 2016)</code></pre>
-<pre class="r"><code>colnames(income)</code></pre>
-<pre><code>##  [1] &quot;state&quot;           &quot;zip_code&quot;        &quot;num_tax_ret&quot;     &quot;zip_agi&quot;        
-##  [5] &quot;zip_avg_agi&quot;     &quot;ret_w_total&quot;     &quot;sum_zip_income&quot;  &quot;zip_avg_income&quot; 
-##  [9] &quot;num_ret_taxable&quot; &quot;taxable_amt&quot;     &quot;avg_taxable&quot;</code></pre>
+- zipcode: Zipcode.
+- AGI: Adjusted Gross Income</code></pre>
+<div id="merging-the-two-dataframes." class="section level2">
+<h2>Merging the two dataframes.</h2>
+<pre class="r"><code># Merging by zip_code and state
+merged &lt;- scripts %&gt;%
+  left_join(income, by = c(&quot;state&quot;, &quot;zip_code&quot;)) %&gt;%
+  na.omit(merged)
+
+head(merged)</code></pre>
+<pre><code>##   zip_code state          doc_spec op_cnt op_rate LA_op_cnt LA_op_rate
+## 1    21502    MD Internal Medicine     13    0.03         0       0.00
+## 2    43623    OH    Anesthesiology    891    0.49       143       0.16
+## 3    15825    PA   Family Practice     22    0.01         0       0.00
+## 4    80045    CO   General Surgery     12    0.29         0       0.00
+## 5    32725    FL   Family Practice     73    0.01         0       0.00
+## 6    18951    PA Internal Medicine    133    0.02        27       0.20
+##   zip_avg_income
+## 1       45932.16
+## 2       59763.96
+## 3       46183.04
+## 4       42684.38
+## 5       37630.10
+## 6       62075.86</code></pre>
+<p>We will begin the analysis by looking at opioid prescription types.
+The two types of opioid prescriptions are regular acting (op_cnt,
+op_rate) and Long Acting (LA_op_cnt, LA_op_rate). From Figure 1, we can
+see that regular acting opioids are prescribed far more often than Long
+Acting.</p>
+<pre class="r"><code>total_prescribed &lt;- merged %&gt;%
+  summarise(total_op_cnt = sum(op_cnt, na.rm = TRUE),
+            total_LA_cnt = sum(LA_op_cnt, na.rm = TRUE))
+
+total_prescribed</code></pre>
+<pre><code>##   total_op_cnt total_LA_cnt
+## 1     55547026      6328111</code></pre>
+</div>
 
 
 
