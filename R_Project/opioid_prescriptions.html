@@ -367,12 +367,14 @@ display: none;
 ##     intersect, setdiff, setequal, union</code></pre>
 <pre class="r"><code>library(ggplot2)</code></pre>
 <p><br></p>
-<div id="data-selection" class="section level2">
-<h2>Data Selection</h2>
-<p>Our data regarding opioid prescriptions is provided by the Centers
-for Medicare and Medicaid Services (CMS).</p>
+<div id="part-1.-data-selection-and-cleaning" class="section level1">
+<h1>Part 1. Data Selection and Cleaning</h1>
+<div id="perscription-data" class="section level3">
+<h3>Perscription Data</h3>
+<p><strong>Our data regarding opioid prescriptions is provided by the
+Centers for Medicare and Medicaid Services (CMS).</strong></p>
 <p>The raw data can be accessed here: <a href="https://data.cms.gov/summary-statistics-on-use-and-payments/medicare-medicaid-opioid-prescribing-rates/medicare-part-d-opioid-prescribing-rates-by-geography" class="uri">https://data.cms.gov/summary-statistics-on-use-and-payments/medicare-medicaid-opioid-prescribing-rates/medicare-part-d-opioid-prescribing-rates-by-geography</a></p>
-<p>Original Data Information</p>
+<p><strong>Original Data Information</strong></p>
 <pre><code>Provided By: CMS
 Contact Email: medicareproviderdata@cms.hhs.gov
 Bureau Code: 009.38
@@ -380,6 +382,24 @@ Program Code: 009.000
 Last Updated: February 8, 2021
 Number of Rows: 1,204,935
 Number of Columns: 11</code></pre>
+<p><strong>Our data from CMS is assigned to the variable
+<em>scripts</em>.</strong> The <em>scripts</em> dataframe contains the
+following columns:</p>
+<pre><code>- NPI: National Provider Identifier for Doctor Identification.
+- last_name, first_name: Prescribing Doctor&#39;s last and first name.
+- zip_code: Zip code of prescriber.
+- state: State of prescriber.
+- doc_spec: Specialty of Doctor (ex. Anesthesiology, Internal Medicine, Dentist, etc.)
+- tot_presc_cnt: Total amount of prescriptions by the doctor (inclusive of non-opioids)
+- op_cnt: Amount of opioid prescriptions by the doctor.
+- op_rate: Changes in the amount of opioid prescriptions over time by the doctor.
+- LA_op_cnt: Amount of Long-Acting opioid prescriptions by the doctor.
+- LA_op_rate: Changes in the amount of Long-Acting opioid prescriptions over time by the doctor.</code></pre>
+<p>Our <em>scripts</em> dataframe is also cleaned for easier analysis.
+Cleaning involves:</p>
+<pre><code>1. Removing information reguarding prescribers NPI, first, and last name for privacy.
+2. Removing data for providers who have not prescibed any opioids, they will not be relavent to our analysis.
+3. Replacing NA values in LA_op_cnt and LA_op_rate with 0.</code></pre>
 <pre class="r"><code>scripts &lt;- read.csv(&quot;data/op_2021_data.csv&quot;)
 scripts &lt;- scripts %&gt;%
   rename(last_name = NPPES.Provider.Last.Name,
@@ -393,15 +413,15 @@ scripts &lt;- scripts %&gt;%
          LA_op_cnt = Long.Acting.Opioid.Claim.Count,
          LA_op_rate = Long.Acting.Opioid.Prescribing.Rate)
 
-# Selecting relevant columns
+# 1. Selecting relevant columns
 scripts &lt;- scripts %&gt;%
   select(zip_code, state, doc_spec, op_cnt, op_rate, LA_op_cnt, LA_op_rate)
 
-# Removing doctors who have not prescribed any opioids
+# 2. Removing doctors who have not prescribed any opioids
 scripts &lt;- scripts %&gt;%
   filter(op_cnt &gt; 0 | LA_op_cnt &gt; 0)
 
-# Replacing NA values in LA_op_cnt and LA_op_rate with 0
+# 3. Replacing NA values in LA_op_cnt and LA_op_rate with 0
 scripts$LA_op_cnt[is.na(scripts$LA_op_cnt)] &lt;- 0
 scripts$LA_op_rate[is.na(scripts$LA_op_rate)] &lt;- 0
 
@@ -435,43 +455,53 @@ glimpse(scripts)</code></pre>
 ##  3rd Qu.:0.2300   3rd Qu.:   0.00   3rd Qu.:0.00000  
 ##  Max.   :1.0000   Max.   :6635.00   Max.   :1.00000  
 ## </code></pre>
-<p>Our data from CMS is assigned to the variable ‘scripts’.</p>
-<p>The scripts dataset contains the following columns:</p>
-<pre><code>- NPI:  National Provider Identifier for Doctor Identification.
-- last_name, first_name: Prescribing Doctor&#39;s last and first name.
-- zip_code: Zip code of prescriber.
-- state: State of prescriber.
-- doc_spec: Specialty of Doctor (ex. Anesthesiology, Internal Medicine, Dentist, etc.)
-- tot_presc_cnt: Total amount of prescriptions by the doctor (inclusive of non-opioids)
-- op_cnt: Amount of opioid prescriptions by the doctor.
-- op_rate: Changes in the amount of opioid prescriptions over time by the doctor.
-- LA_op_cnt: Amount of Long-Acting opioid prescriptions by the doctor.
-- LA_op_rate: Changes in the amount of Long-Acting opioid prescriptions over time by the doctor.</code></pre>
-<p>Our scripts dataframe is also cleaned for easier analysis. Cleaning
-involves:</p>
-<pre><code>Removing information reguarding prescribers NPI, first, and last name for privacy.
-Removing data for providers who have not prescibed any opioids, they will not be relavent to our analysis.
-Replacing NA values in LA_op_cnt and LA_op_rate with 0.</code></pre>
 <p><br></p>
-<p>Our data regarding average incomes in different area codes is
-provided by the Internal Revenue Service (IRS).</p>
+</div>
+<div id="income-data" class="section level3">
+<h3>Income Data</h3>
+<p><strong>Our data regarding average incomes in different area codes is
+provided by the Internal Revenue Service (IRS).</strong></p>
 <p>The raw data can be accessed here: <a href="https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-statistics-2016-zip-code-data-soi" class="uri">https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-statistics-2016-zip-code-data-soi</a></p>
-<p>I will be using a semi-cleaned version of the IRS data created by Jon
-Loyens and posted publically on data.world.</p>
-<p>The cleaned data can be accessed here: <a href="https://data.world/jonloyens/irs-income-by-zip-code" class="uri">https://data.world/jonloyens/irs-income-by-zip-code</a></p>
+<p><strong>I will be using a semi-cleaned version of this IRS data,
+created by Jon Loyens and posted publicly on data.world.</strong></p>
+<p>The semi-cleaned data can be accessed here: <a href="https://data.world/jonloyens/irs-income-by-zip-code" class="uri">https://data.world/jonloyens/irs-income-by-zip-code</a></p>
+</div>
+<div id="original-data-information" class="section level3">
+<h3>Original Data Information</h3>
+<pre><code>Provided By: Jon Loyens
+Contact Address: @jonloyens (twitter)
+Last Updated: June 16, 2016
+Number of Rows: 27,790
+Number of Columns: 11</code></pre>
+<p><strong>Our data from the IRS is assigned to the variable
+<em>income</em>.</strong></p>
+<p>The raw dataset from the IRS contains 147 columns and from that our
+cleaned Loyens dataset contains 11 columns. Our income dataframe will
+only use three of those columns. The <em>income</em> dataframe contains
+the following columns:</p>
+<pre><code>- state: The state the zip code is located in.
+- zip_code: Zipcode.
+- zip_avg_income: Average income for a certain zip_code.</code></pre>
+<p>Our <em>income</em> dataframe is also further cleaned for easier
+analysis. Cleaning involves:</p>
+<pre><code>1. Selecting only the relavent columns of state, zip_code, and zip_avg_income.
+2. Increasing zip_avg_income by a factor of 1000 to get full income values.
+3. Removing rows where zip_code does not have 5 digits, as these are not valid zip codes.
+3. Removing rows where zip_code equals 99999, as these are &quot;other&quot; areas such as a single building or non-residential zip.</code></pre>
 <pre class="r"><code>income &lt;- read.csv(&quot;data/IRSIncomeByZipCode.csv&quot;)
 income &lt;- income %&gt;% 
   rename(state = STATE,
          zip_code = ZIPCODE,
          zip_avg_income = `Avg.total.income`)
 
-# Selecting relevant columns
+# 1. Selecting relevant columns
 income &lt;- income %&gt;%
   select(state, zip_code, zip_avg_income)
 
+# 2. Increasing zip_avg_income by a factor of 1000 to get full income values
 income$zip_avg_income &lt;- income$zip_avg_income * 1000
 
-# Removing rows where zip_code does not have 5 digits or 99999 zip codes
+# 3. Removing rows where zip_code does not have 5 digits or 99999 zip codes
 income &lt;- income %&gt;%
   filter(nchar(as.character(zip_code)) == 5) %&gt;%
   filter(zip_code != 99999)
@@ -490,13 +520,9 @@ glimpse(income)</code></pre>
 ##                     Mean   :52625   Mean   :  56658  
 ##                     3rd Qu.:72329   3rd Qu.:  60174  
 ##                     Max.   :99901   Max.   :1831838</code></pre>
-<p>The income dataset contains the following values:</p>
-<pre><code>- state: The state the zip code is located in.
-- zipcode: Zipcode.
-- AGI: Adjusted Gross Income</code></pre>
 </div>
-<div id="merging-the-two-dataframes." class="section level2">
-<h2>Merging the two dataframes.</h2>
+<div id="merging-the-two-dataframes." class="section level3">
+<h3>Merging the two dataframes.</h3>
 <pre class="r"><code># Merging by zip_code and state
 merged &lt;- scripts %&gt;%
   left_join(income, by = c(&quot;state&quot;, &quot;zip_code&quot;)) %&gt;%
@@ -529,6 +555,7 @@ Acting.</p>
 total_prescribed</code></pre>
 <pre><code>##   total_op_cnt total_LA_cnt
 ## 1     55547026      6328111</code></pre>
+</div>
 </div>
 
 
