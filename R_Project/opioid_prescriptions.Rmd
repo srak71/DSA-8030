@@ -5,11 +5,28 @@ output: html_document
 date: "Due: October 21, 2024"
 ---
 
-```{r setup, include=FALSE}
+```{r setup}
 library(dplyr)
 library(ggplot2)
-library(summarytools)
 ```
+
+<br>
+
+## Data Selection
+
+Our data regarding opioid prescriptions is provided by the Centers for Medicare and Medicaid Services (CMS). 
+
+The raw data can be accessed here: https://data.cms.gov/summary-statistics-on-use-and-payments/medicare-medicaid-opioid-prescribing-rates/medicare-part-d-opioid-prescribing-rates-by-geography
+
+Original Data Information
+
+    Provided By: CMS
+    Contact Email: medicareproviderdata@cms.hhs.gov
+    Bureau Code: 009.38
+    Program Code: 009.000
+    Last Updated: February 8, 2021
+    Number of Rows: 1,204,935
+    Number of Columns: 11
 
 ```{R}
 scripts <- read.csv("data/op_2021_data.csv")
@@ -31,7 +48,7 @@ scripts <- scripts %>%
 
 # Removing doctors who have not prescribed any opioids
 scripts <- scripts %>%
-  filter(op_cnt > 0)
+  filter(op_cnt > 0 | LA_op_cnt > 0)
 
 # Replacing NA values in LA_op_cnt and LA_op_rate with 0
 scripts$LA_op_cnt[is.na(scripts$LA_op_cnt)] <- 0
@@ -44,9 +61,11 @@ glimpse(scripts)
 summary(scripts)
 ```
 
-The scripts dataset contains the following values:
+Our data from CMS is assigned to the variable 'scripts'. 
 
-    - NPI:  National Provider Identifier for Doctor Identification.
+The scripts dataset contains the following columns:
+
+    - NPI: National Provider Identifier for Doctor Identification.
     - last_name, first_name: Prescribing Doctor's last and first name.
     - zip_code: Zip code of prescriber.
     - state: State of prescriber.
@@ -57,6 +76,21 @@ The scripts dataset contains the following values:
     - LA_op_cnt: Amount of Long-Acting opioid prescriptions by the doctor.
     - LA_op_rate: Changes in the amount of Long-Acting opioid prescriptions over time by the doctor.
 
+Our scripts dataframe is also cleaned for easier analysis. Cleaning involves:
+
+    Removing information reguarding prescribers NPI, first, and last name for privacy.
+    Removing data for providers who have not prescibed any opioids, they will not be relavent to our analysis.
+    Replacing NA values in LA_op_cnt and LA_op_rate with 0.
+
+<br>
+
+Our data regarding average incomes in different area codes is provided by the Internal Revenue Service (IRS).
+
+The raw data can be accessed here: https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-statistics-2016-zip-code-data-soi
+
+I will be using a semi-cleaned version of this IRS data, created by Jon Loyens and posted publicly on data.world. 
+
+The semi-cleaned data can be accessed here: https://data.world/jonloyens/irs-income-by-zip-code
 
 
 ```{R}
@@ -64,15 +98,7 @@ income <- read.csv("data/IRSIncomeByZipCode.csv")
 income <- income %>% 
   rename(state = STATE,
          zip_code = ZIPCODE,
-         num_tax_ret = `Number.of.returns`,
-         zip_agi = `Adjusted.gross.income..AGI.`,
-         zip_avg_agi = `Avg.AGI`,
-         ret_w_total = `Number.of.returns.with.total.income`,
-         sum_zip_income = `Total.income.amount`,
-         zip_avg_income = `Avg.total.income`,
-         num_ret_taxable = `Number.of.returns.with.taxable.income`,
-         taxable_amt = `Taxable.income.amount`,
-         avg_taxable = `Avg.taxable.income`)
+         zip_avg_income = `Avg.total.income`)
 
 # Selecting relevant columns
 income <- income %>%
@@ -88,7 +114,9 @@ income <- income %>%
 glimpse(income)
 summary(income)
 ```
-  
+
+Our data from the IRS, and partially cleaned by Jon Loyens, is assigned to the variable 'income'.  
+
 The income dataset contains the following values:
 
     - state: The state the zip code is located in.

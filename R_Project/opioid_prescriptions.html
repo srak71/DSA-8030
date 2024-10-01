@@ -356,6 +356,30 @@ display: none;
 </div>
 
 
+<pre class="r"><code>library(dplyr)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>library(ggplot2)</code></pre>
+<p><br></p>
+<div id="data-selection" class="section level2">
+<h2>Data Selection</h2>
+<p>Our data regarding opioid prescriptions is provided by the Centers
+for Medicare and Medicaid Services (CMS).</p>
+<p>The raw data can be accessed here: <a href="https://data.cms.gov/summary-statistics-on-use-and-payments/medicare-medicaid-opioid-prescribing-rates/medicare-part-d-opioid-prescribing-rates-by-geography" class="uri">https://data.cms.gov/summary-statistics-on-use-and-payments/medicare-medicaid-opioid-prescribing-rates/medicare-part-d-opioid-prescribing-rates-by-geography</a></p>
+<p>Original Data Information</p>
+<pre><code>Provided By: CMS
+Contact Email: medicareproviderdata@cms.hhs.gov
+Bureau Code: 009.38
+Program Code: 009.000
+Last Updated: February 8, 2021
+Number of Rows: 1,204,935
+Number of Columns: 11</code></pre>
 <pre class="r"><code>scripts &lt;- read.csv(&quot;data/op_2021_data.csv&quot;)
 scripts &lt;- scripts %&gt;%
   rename(last_name = NPPES.Provider.Last.Name,
@@ -375,7 +399,7 @@ scripts &lt;- scripts %&gt;%
 
 # Removing doctors who have not prescribed any opioids
 scripts &lt;- scripts %&gt;%
-  filter(op_cnt &gt; 0)
+  filter(op_cnt &gt; 0 | LA_op_cnt &gt; 0)
 
 # Replacing NA values in LA_op_cnt and LA_op_rate with 0
 scripts$LA_op_cnt[is.na(scripts$LA_op_cnt)] &lt;- 0
@@ -411,7 +435,8 @@ glimpse(scripts)</code></pre>
 ##  3rd Qu.:0.2300   3rd Qu.:   0.00   3rd Qu.:0.00000  
 ##  Max.   :1.0000   Max.   :6635.00   Max.   :1.00000  
 ## </code></pre>
-<p>The scripts dataset contains the following values:</p>
+<p>Our data from CMS is assigned to the variable ‘scripts’.</p>
+<p>The scripts dataset contains the following columns:</p>
 <pre><code>- NPI:  National Provider Identifier for Doctor Identification.
 - last_name, first_name: Prescribing Doctor&#39;s last and first name.
 - zip_code: Zip code of prescriber.
@@ -422,19 +447,23 @@ glimpse(scripts)</code></pre>
 - op_rate: Changes in the amount of opioid prescriptions over time by the doctor.
 - LA_op_cnt: Amount of Long-Acting opioid prescriptions by the doctor.
 - LA_op_rate: Changes in the amount of Long-Acting opioid prescriptions over time by the doctor.</code></pre>
+<p>Our scripts dataframe is also cleaned for easier analysis. Cleaning
+involves:</p>
+<pre><code>Removing information reguarding prescribers NPI, first, and last name for privacy.
+Removing data for providers who have not prescibed any opioids, they will not be relavent to our analysis.
+Replacing NA values in LA_op_cnt and LA_op_rate with 0.</code></pre>
+<p><br></p>
+<p>Our data regarding average incomes in different area codes is
+provided by the Internal Revenue Service (IRS).</p>
+<p>The raw data can be accessed here: <a href="https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-statistics-2016-zip-code-data-soi" class="uri">https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-statistics-2016-zip-code-data-soi</a></p>
+<p>I will be using a semi-cleaned version of the IRS data created by Jon
+Loyens and posted publically on data.world.</p>
+<p>The cleaned data can be accessed here: <a href="https://data.world/jonloyens/irs-income-by-zip-code" class="uri">https://data.world/jonloyens/irs-income-by-zip-code</a></p>
 <pre class="r"><code>income &lt;- read.csv(&quot;data/IRSIncomeByZipCode.csv&quot;)
 income &lt;- income %&gt;% 
   rename(state = STATE,
          zip_code = ZIPCODE,
-         num_tax_ret = `Number.of.returns`,
-         zip_agi = `Adjusted.gross.income..AGI.`,
-         zip_avg_agi = `Avg.AGI`,
-         ret_w_total = `Number.of.returns.with.total.income`,
-         sum_zip_income = `Total.income.amount`,
-         zip_avg_income = `Avg.total.income`,
-         num_ret_taxable = `Number.of.returns.with.taxable.income`,
-         taxable_amt = `Taxable.income.amount`,
-         avg_taxable = `Avg.taxable.income`)
+         zip_avg_income = `Avg.total.income`)
 
 # Selecting relevant columns
 income &lt;- income %&gt;%
@@ -465,6 +494,7 @@ glimpse(income)</code></pre>
 <pre><code>- state: The state the zip code is located in.
 - zipcode: Zipcode.
 - AGI: Adjusted Gross Income</code></pre>
+</div>
 <div id="merging-the-two-dataframes." class="section level2">
 <h2>Merging the two dataframes.</h2>
 <pre class="r"><code># Merging by zip_code and state
