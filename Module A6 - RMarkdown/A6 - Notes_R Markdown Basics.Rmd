@@ -1,0 +1,179 @@
+---
+title: "DSA 8030 - A5: Notes - Communication"
+output: html_document
+---
+
+# Header 1
+
+This is text under the first header.
+
+## Header 2
+### Header 3
+#### Header 4
+
+***
+
+
+## Bulleted Lists
+
+Now let's look at bulletted lists 
+
+* List element 1
+* List element 2
+* List element 3
+   + sub element 3a
+   + sub element 3b
+   
+   
+## Numbered List
+Now let's look at how to number lists.
+
+1. Number list item 1
+2. Number list item 2 
+   + sub element 2a
+3. Number list item 3
+   a. sub element 3a
+   
+
+***
+
+
+## Text Formatting
+
+Italics  
+* Make text italic like *this* or _this_.
+
+Bold  
+* Make text bold like **this** or __this__.
+
+Subscripts  
+
+* Make subscripts using tildes ~.  For example, H~2~0. 
+
+Superscripts
+
+* Make superscripts using ^. For example, R^2^.
+
+Inline code
+
+* Make inline code by using backticks.  For example: I am going to use `library(ggplot2)` to enable the ggplot2 library.  
+
+***
+
+## Add Hyperlinks
+
+### In-line link
+
+This is a direct in-line link: <https://rmarkdown.rstudio.com/>.
+
+### Phrase link
+
+Phrase links: Rstudio's [R Markdown page](https://rmarkdown.rstudio.com/).
+
+
+
+**Note the change to this code**
+
+### Image link
+[![Clemson link](1675173.jpg)](https://rmarkdown.rstudio.com/)
+
+
+***
+
+
+## Insert Image
+
+Note: image files need to be saved in the same folder location as the R Markdown file OR you must use the entire file path. 
+
+![with Caption](1675173.jpg)
+
+![](1675173.jpg)
+
+### Resize image
+
+![with Caption](1675173.jpg){width=25%}
+
+
+### Center your image
+
+<center>
+
+![with Caption](1675173.jpg){width=25%}
+</center>
+
+
+### Insert image using R Code Chunk
+
+**Note this is new code**
+
+```{r, echo=FALSE, out.width="25%", fig.align="center", warning=FALSE}
+library(knitr)
+knitr::include_graphics("1675173.jpg")
+```
+
+
+***
+
+
+## Add R code chunks
+
+This code will show code chunk and show output
+```{r}
+library(ggplot2)
+ggplot(diamonds, aes(y=cut, x=carat, fill=cut)) + geom_boxplot()
+```
+
+This code will show code chunk but not output
+
+```{r eval=FALSE}
+library(ggplot2)
+ggplot(diamonds, aes(y=cut, x=carat, fill=cut)) + geom_boxplot()
+
+```
+
+This code will not show code chunk but will show output
+```{r echo=FALSE}
+library(ggplot2)
+ggplot(diamonds, aes(y=cut, x=carat, fill=cut)) + geom_boxplot()
+
+```
+
+This code will execute but not show code or output
+```{r include=FALSE}
+library(ggplot2)
+ggplot(diamonds, aes(y=cut, x=carat, fill=cut)) + geom_boxplot()
+
+```
+
+This code will hide warnings and messages
+```{r warning=FALSE, message=FALSE}
+library(ggplot2)
+ggplot(diamonds, aes(y=cut, x=carat, fill=cut)) + geom_boxplot()
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   
+
+
+
+
+

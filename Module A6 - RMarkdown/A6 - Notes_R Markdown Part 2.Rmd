@@ -1,0 +1,369 @@
+---
+title: "A5: Notes - R Markdown - Part 2"
+output: 
+  html_document:
+    df_print: paged
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    number_sections: true
+---
+
+Attributes in R Markdown are executed differently depending on which type of output you are producing.
+
+We will focus on HTML, things are similar but different for pdf.  Below are examples from our text and other sources (see reference list below).  
+
+# YAML
+
+The YAML is the header providing details about the document.  The `yaml` header is delineated by three dashes before and after.  The trick to the yaml is knowing what tags to add.  
+
+To see what options are available in the YAML for an html document type the following code in the console.
+
+```{r eval=FALSE}
+?rmarkdown::html_document
+```
+
+#Side-by-Side Figures
+
+Sometimes it is nice to print plots or graphs side by side.  In the console we have done this using the `par` function.  In rmarkdown this can be done with the code chunk options.  Setting `fig.show` to `"hold"` and `out.width` to 50% will result in side-by-side graphs. Figures in this case is referring to r generated graphs/plots not images. 
+
+```{r fig.show='hold', out.width="50%", warning=FALSE}
+library(tidyverse)
+plot <- ggplot(mtcars, aes(x = cyl, y = mpg)) + 
+  geom_point()
+
+# left image
+plot
+# right image
+plot + geom_line()
+```
+
+# Data frame printing
+
+Printing a large dataset to an r markdown file can render alot of unnecessary scrolling. Using the `df_print: paged` option in the YAML header will help.  
+
+```{r}
+data("PimaIndiansDiabetes2", package = "mlbench")
+# remove missing values and create temporary dataframe
+PID <- na.omit(PimaIndiansDiabetes2)
+PID
+```
+
+
+
+# DataTables
+
+While visualizing data with graphs is usually the preferred method, sometimes data must be presented in tabular form. For static tables kable from the knitr package prints nice looking tables that are adapted to the type of output document. 
+
+```{r}
+knitr::kable(head(PID), caption='Tabular data printed using kable.')
+```
+
+# Inline code
+
+If I have output from code that I would like to use in my explanation or text, you can do so by utilizing the inline code feature.  to do this you add `r ` to a line of text.  
+
+For example..
+
+```{r}
+Y <- sqrt(3425)
+Y
+```
+
+If I want to use the value of Y in my text I can do the following: 
+
+The value of Y is `r Y`.
+
+
+
+# Color text
+
+To color text in html format use `<span>`.  
+
+<span style="color: purple;">Any text I write within span with the style="color: purple;" option will turn the text purple. </span>
+
+You can write the color in words (which can be seen [here](https://www.w3schools.com/colors/colors_names.asp)).  
+
+# Tabs {.tabset}
+
+You can organize sections into tab form by adding `.tabset` to a section header.  To end the tabs start a new section header.  
+
+## tab 1
+
+The text here will appear in tab 1
+
+## tab 2 
+
+The text here will appear in tab 2
+
+## tab 3
+
+you can put text and plots in tabs
+
+```{r}
+plot
+```
+
+# Themes
+
+To add a theme to your R Markdown file add `theme: ` to your YAML.  
+
+For a list of possible themes visit: [https://bootswatch.com](https://bootswatch.com)
+
+Notice: some themes can change your desired output
+
+
+
+# Maps
+
+If you have location data it may be helpful to use R to create a map of your data.  Below is a simple example of creating a map.  There are other ways to create more detailed static maps.  We will look at how to create interactive maps later. 
+
+```{r warning=FALSE}
+library(maps)
+library(mapdata)
+
+#Create a basic map of US
+map('state')
+#add title to your map
+title('Map of the United States')
+```
+
+Plot using base map and customizable colors.
+
+```{r}
+map('state', col = "darkgray",
+    fill = TRUE,
+    border = "white")
+# add a title to your map
+title('Map of the United States')
+```
+
+Create a map of South Carolina with county boundaries. Notice you can create multiple-line titles using \n. 
+
+```{r}
+map('county', regions = "South Carolina", col = "darkgray", fill = TRUE, border = "grey80")
+map('state', regions = "South Carolina", col = "black", add = TRUE)
+# add the x, y location of the Clemson using the points (these x, y locations are the DD coordinates of latitude and longitude)
+# two colors and sized are used to make the symbol look a little brighter
+
+points(x = -82.83737, y = 34.68344, pch = 21, col = "slateblue2", cex = 2)
+points(x = -82.83737, y = 34.68344, pch = 8, col = "orangered", cex = 1.3)
+# add a title to your map
+title('County Map of South Carolina\nClemson location')
+```
+
+You can also stack several map layers using `add=TRUE`.  
+
+```{r}
+map('state', fill = TRUE, col = "darkgray", border = "white", lwd = 1)
+map(database = "usa", lwd = 1, add = TRUE)
+# add the adjacent parts of the US; can't forget my homeland
+map("state", "south carolina", col = "orangered",
+    lwd = 1, fill = TRUE, add = TRUE)
+# add Clemson location
+title("Clemson\nSouth Carolina")
+# add the x, y location of Clemson using the points
+points(x = -82.83737, y = 34.68344, pch = 8, col = "slateblue2", cex = 1.3)
+```
+
+To see the different colors for r graphs visit [here](https://www.nceas.ucsb.edu/sites/default/files/2020-04/colorPaletteCheatsheet.pdf)
+
+
+# HTML Widgets
+
+The `htmlwidgets` package enables the simple creation of R packages that provide R bindings for arbitrary JavaScript libraries. This provides R users access to a wide array of useful JavaScript libraries for visualizing data, all within R and without having to learn JavaScript.
+
+## datatables
+
+The DT package provides an interactive tabular experience through the DataTables JavaScript library. Since DT is based on htmlwidgets, its full interactivity is only experienced in HTML-based output.
+
+```{r warning=FALSE}
+library(DT)
+data(diamonds, package='ggplot2')
+datatable(head(diamonds, 100))
+```
+
+The DataTable library has many extensions, plugins and options, most of which are implemented by the DT package. To make our table look nicer we turn off rownames; make each column searchable with the filter argument; enable the Scroller extension for better vertical scrolling; allow horizontal scrolling with scrollX; and set the displayed dom elements to be the table itself (t), table information (i) and the Scroller capability (S). Some of these are listed as arguments to the datatable function, and others are specified in a list provided to the options argument.  Deciphering what argument goes in which part of the function unfortunately requires scouring the DT documentation and vignettes and the DataTables documentation.
+
+```{r}
+datatable(head(diamonds, 100),
+          rownames=FALSE, 
+          extensions='Scroller', filter='top',
+          options = list(dom = "tiS", scrollX=TRUE,
+                         scrollY = 400,
+                         scrollCollapse = TRUE)
+          )
+```
+
+A datatables object can be passed, via a pipe, to formatting functions to customize the output. The following code builds a datatables object, formats the price column as currency rounded to the nearest whole number and color codes the rows depending on the value of the cut column. 
+
+```{r}
+datatable(head(diamonds, 100),
+          rownames=FALSE, 
+          extensions='Scroller', filter='top',
+          options = list(dom = "tiS", scrollX=TRUE,
+                         scrollY = 400,
+                         scrollCollapse = TRUE
+                         )
+          ) %>% 
+  formatCurrency('price', digits=0) %>%
+  formatStyle(columns='cut', 
+              valueColumns='cut', 
+              target='row',
+              backgroundColor=styleEqual(levels=c('Good', 'Ideal'),values=c('red', 'green'))
+              )
+```
+
+
+## leaflet
+
+Map capabilities can be extended to interactive maps using the leaflet package.  This package creates maps based on the OpenStreetMap (or other map provider) that are scrollable and zoomable. It can also use shapefiles, GeoJSON, TopoJSON and raster images to build up the map. To see this in action we plot a list of favorite pizza places on a map used by our textbook.
+
+First we read the JSON file holding the list of favorite pizza places.
+
+```{r warning=FALSE}
+library(jsonlite)
+pizza <- fromJSON('http://www.jaredlander.com/data/PizzaFavorites.json')
+pizza
+class(pizza$Details)
+class(pizza$Details[[1]])
+dim(pizza$Details[[1]])
+```
+
+We see that the Details column is a list-column where each element is a data.frame with four columns. We want to un-nest this structure so that pizza is a data.frame where each row has a column for every column in the nested data.frames. In order to get longitude and latitude coordinates for the pizza places we need to create a character column that is the combination of all the address columns.
+
+```{r warning=FALSE}
+library(dplyr)
+library(tidyr)
+pizza2 <- pizza %>% unnest(cols=c(Details)) 
+pizza2
+pizza <- pizza %>% unnest(cols=c(Details)) %>%
+  #rename the Address column Street
+  rename(Street=Address) %>%
+  #create a new column to hold entire address
+  unite(col=Address, Street, City, State, Zip, 
+        sep=', ', remove=FALSE)
+pizza
+
+```
+
+The `tidygeocoder` package provides the geocode function to geocode addresses. We use geocode to create columns for latitude and longitude.
+
+```{r warning=FALSE}
+library(tidygeocoder)
+pizza <- pizza %>% geocode(Address)
+pizza
+```
+
+Now that we have data with coordinates we can build a map with markers showing our points of interest. The `leaflet` function initializes the map. Running just that renders a blank map. Passing that object, via pipe, into `addTiles` draws a map, based on OpenStreetMap tiles, at minimum zoom and centered on the Prime Meridian since we did not provide any data. Passing that to the `addMarkers` function adds markers at the specified 'long' and 'lat' of our favorite pizza places. The columns holding the information are specified using the formula interface. Clicking on the markers reveals a popup displaying the name and street address of a pizza place. In an HTML-based document this map can be zoomed and dragged just like any other interactive map
+
+```{r warning=FALSE}
+library(leaflet)
+
+leaflet() %>% addTiles() %>%
+  addMarkers(lng=~long, lat=~lat,
+             popup=~sprintf('%s<br/>%s', Name, Street),
+             data=pizza
+             )
+```
+
+
+## dygraphs
+
+Plotting time series can be done with `ggplot2`, `quantmod` and many other packages, but `dygraphs` creates interactive plots. To illustrate, we look at the GDP data from the World Bank. We use the `WDI` package to access data through the World Bank’s API.
+
+
+```{r warning=FALSE}
+library(WDI)
+gdp <- WDI(country=c("US", "CA", "SG", "IL"),
+           indicator=c("NY.GDP.PCAP.CD"),
+           start=1970, end=2021)
+names(gdp) <- c("iso2c", "Country", "PerCapGDP", "Year")
+head(gdp, 15)
+```
+
+This gives us GDP data in the long format. We convert it to wide format using spread from the tidyr package.
+
+```{r}
+gdpWide <- gdp %>% 
+  dplyr::select(Country, Year, PerCapGDP) %>% 
+  tidyr::spread(key=Country, value=PerCapGDP)
+head(gdpWide)
+```
+
+With the time element in the first column and each time series represented as a single column, we use dygraphs to make an interactive JavaScript plot.
+
+```{r warning=FALSE}
+library(dygraphs)
+dygraph(gdpWide, main='Yearly Per Capita GDP',
+        xlab='Year', ylab='Per Capita GDP') %>%
+  dyOptions(drawPoints = TRUE, pointSize = 1) %>%
+  dyLegend(width=400)
+```
+
+Hovering over lines of the graph will highlight synchronized points on each line and display the values in the legend. Drawing a rectangle in the graph will zoom into the data. We can add a range selection that can be dragged to show different part of the graph with dyRangeSelector.
+
+```{r}
+dygraph(gdpWide, main='Yearly Per Capita GDP',
+        xlab='Year', ylab='Per Capita GDP') %>%
+  dyOptions(drawPoints = TRUE, pointSize = 1) %>%
+  dyLegend(width=400) %>%
+  dyRangeSelector(dateWindow=c("1990", "2000"))
+```
+
+## threejs
+
+The 'threejs', by Bryan Lewis, has functions for building 3D scatterplots and globes that can be spun around to view different angles. To see this we draw arcs between origin and destination cities of flights that were in the air in the afternoon of January 2, 2017. The dataset contains the airport codes and coordinates of the airports on both ends of the route.
+
+```{r warning=FALSE}
+library(readr)
+flights <- read_tsv('http://www.jaredlander.com/data/Flights_Jan_2.tsv')
+head(flights, 10)
+```
+
+The dataset is already in proper form to draw arcs between destinations and origins. It is also prepared to plot points for the airports, but airports are in the dataset multiple times, so the plot will simply overlay the points. It will be more useful to have counts for the number of times an airport appears so that we can draw one point with a height determined by the number of flights originating from each airport.
+
+```{r}
+airports <- flights %>% count(From_Lat, From_Long) %>%
+  arrange(desc(n))
+head(airports, 15)
+```
+
+The first argument to globejs is the image to use as a surface map for the globe. The default image is nice, but NASA has a high-resolution “blue marble” image we use.
+
+```{r}
+earth <- "http://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73909/world.topo.bathy.200412.3x5400x2700.jpg"
+```
+
+Now that the data are prepared and we have a nice image for the surface map, we can draw the globe. The first argument, `img`, is the image to use, which we saved to the `earth` object. The next two arguments, `lat` and `long`, are the coordinates of points to draw. The `value` argument controls how tall to draw the points. The `arcs` argument takes a four-column `data.frame` where the first two columns are the origin latitude and longitude and the second two columns are the destination latitude and longitude. The rest of the arguments customize the look and feel of the globe.
+
+```{r warning=FALSE, message=FALSE}
+library(threejs)
+globejs(img=earth, lat=airports$From_Lat,
+        long=airports$From_Long,
+        value=airports$n*5, color='red',
+        arcs=flights %>%
+          dplyr::select(From_Lat, From_Long, To_Lat, To_Long),
+        arcsHeight=.4, arcsLwd=4,
+        arcsColor="#3e4ca2", arcsOpacity=.85,
+        atmosphere=TRUE, fov=30, rotationlat=.5, 
+        rotationlong=-.05)
+```
+
+
+
+# References: 
+
+* [R for Everyone: Advanced Analytics and Graphics, 2nd Edition](https://learning.oreilly.com/library/view/r-for-everyone/9780134546988/)
+
+* [https://www.earthdatascience.org/courses/earth-analytics/lidar-raster-data-r/ggmap-basemap/](https://www.earthdatascience.org/courses/earth-analytics/lidar-raster-data-r/ggmap-basemap/)
+
+*[https://www.r-bloggers.com/2019/11/geocoding-with-tidygeocoder/](https://www.r-bloggers.com/2019/11/geocoding-with-tidygeocoder/)
+
+* [https://cran.r-project.org/web/packages/tidygeocoder/tidygeocoder.pdf](https://cran.r-project.org/web/packages/tidygeocoder/tidygeocoder.pdf)
+
+* [https://beanumber.github.io/sds192/lab-rmarkdown.html](https://beanumber.github.io/sds192/lab-rmarkdown.html)
+
+* [https://cran.r-project.org/web/packages/prettydoc/vignettes/tactile.html](https://cran.r-project.org/web/packages/prettydoc/vignettes/tactile.html)
+
+* [https://bookdown.org/yihui/rmarkdown-cookbook/html-tabs.html](https://bookdown.org/yihui/rmarkdown-cookbook/html-tabs.html)
