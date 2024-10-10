@@ -10,7 +10,9 @@ output:
     theme: darkly
 ---
 
-# About Me
+---
+
+# About Me {.tabset}
 
 <center>![](IMG_0760.PNG){width=50%}
 
@@ -22,28 +24,30 @@ I have had the privilege of contributing to the U.S. Navy's Space Systems Academ
 
 Recognized for my leadership and technical skills, I am a member of the National Society of Leadership and Success and have been awarded for my research at the Naval Postgraduate School. I thrive in collaborative environments where I can combine my analytical expertise with my passion for solving problems that impact society.
 
+---
 
-# Projects
+# Projects {.tabset}
 
-## **Politician Data Analysis**
+### **Politician Data Analysis**
 
 Performed multiple hypothesis testing and causal inference to analyze candidates' personal qualities and their correlation to Primary Election wins. A/B testing for individual variables and comparison of p-values after assigning categorical variables to binary representations. Multiple Regression analysis and Inverse Propensity Weighting. <https://github.com/srak71/Politician-Analysis>
 
-## **Opioid Prescription Trends**
+### **Opioid Prescription Trends**
 
 Analyzing trends of opiate prescriptions at different area codes associated with average income. Proved that doctors practicing in lower income area codes were more frequent to write prescriptions of high strength opioids. Differential Privacy, Causal Inference, Regression Sampling, Gibbs Sampling, Bootstrapping. <https://github.com/srak71/Opioid-Data-Analysis>
 
 
-## **Bearmaps**
+### **Bearmaps**
 
 Implemented online graph and tree searching to create a Google Maps clone. Rasterized a map, found the closest route to a coordinate destination, and provided directions to the user based on landmarks. Real-time updated directions based on client location.
 
-## **End-to-End Encrypted File Sharing System**
+### **End-to-End Encrypted File Sharing System**
 
 Utilized cryptographic primitives to design and implement a client application for secure file sharing. Public Key Encryption, Digital Signatures, Hash-Based M.A.C., Hash and Password Based Key Derivation, Symmetric Encryption, pseudo- random byte generation.
 
+---
 
-# Programming Skills
+# Programming Skills {.tabset}
 
 <span style="color: blue;">Programming Languages:</span>
 
@@ -81,19 +85,24 @@ Utilized cryptographic primitives to design and implement a client application f
 
 - seaborn, matplotlib, ggplot2, Tableau : 5 yrs
 
+---
 
-# Links
+# Links {.tabset}
 
 1. linkedIn: <https://www.linkedin.com/in/srak71/>
 
 2. GitHub: <https://github.com/srak71>
 
+---
 
-# Resumè
+# Resumè {.tabset}
+
 ```{r out.width="100%", out.height="200%", echo=FALSE}
 knitr::include_graphics("resume2.png")
 ```
 
-# Contact Me
+---
+
+# Contact Me {.tabset}
 
 Email: saransh707@gmail.com
