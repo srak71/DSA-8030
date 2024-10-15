@@ -1,0 +1,132 @@
+---
+title: "Example 2: Mtcars Shiny Flexdashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: scroll
+runtime: shiny
+---
+
+```{r, include=FALSE}
+library(ggplot2)
+```
+
+Inputs {.sidebar}
+------------------------------------
+
+```{r}
+
+#choose a variable
+selectInput(inputId = 'Variable', 
+            label = 'Select variable to graph', 
+            choices = names(mtcars))
+
+```
+
+### Histogram Inputs
+```{r}
+
+#choose size of bin
+sliderInput(inputId = 'BinSize', 
+            label = 'Select bin size',
+            min = 5,max = 50, value = 25)
+
+#choose a color
+selectInput(inputId = 'Color', 
+            label = 'Choose a Histogram color', 
+            choices = colors())
+```
+
+### Boxplot Inputs
+
+```{r}
+
+#check box for horizontal or vertical
+checkboxInput(inputId = "Horizontal", 
+              label = "Check for Horizontal Boxplot", 
+              value = TRUE)
+
+selectInput(inputId = "BoxplotColor", 
+            label = "Choose a boxplot color", 
+            choices = colors())
+
+selectInput(inputId = "GroupVar", 
+            label = "Group Variable", 
+            choices = cbind("cyl", 
+                            "vs", 
+                            "am"))
+```
+
+
+Row {data-height=215}
+-------------------------------
+
+### Description of Data
+
+```{r echo=FALSE}
+#variable descriptions
+descr <- c(mpg="Miles/(US) gallon", 
+           cyl="Number of cylinders", 
+           disp="Displacement (cu.in.)", 
+           hp="Gross horsepower", 
+           drat="Rear axle ratio", 
+           wt="Weight (1000 lbs)", 
+           qsec="1/4 mile time", 
+           vs="Engine(0=V-shaped, 1=straight",
+           am="Transmission (0=automatic, 1=manual)", 
+           gear="Number of forward gears", 
+           carb="Number of carburetors"
+           )
+```
+
+```{r}
+#print description
+
+renderUI({
+  str1 <- "Data Description:" 
+  str2 <- "The data was extracted from the 1974 Motor Trend US magazine, and comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973–74 models)."
+  str3 <- paste("You have selected the variable:", input$Variable)
+  str4 <- paste("Description of Variable:", descr[input$Variable])
+  bl <- paste(" ")
+  
+  HTML(paste(str1, str2, bl, str3, str4, sep='<br/>'))
+
+})
+
+```
+
+Row {.tabset .tabset-fade}
+---------------------------------
+
+### Histogram 
+
+```{r}
+#create histogram from inputs
+renderPlot(ggplot(mtcars, 
+                  aes_string(x=input$Variable)) + 
+  geom_histogram(bins=input$BinSize,
+                 fill=input$Color, col="white"))
+
+```
+
+
+### Boxplot
+
+```{r}
+
+formulaText <- reactive({paste(input$Variable, "~", input$GroupVar)})
+
+#create boxplots from inputs
+  renderPlot({
+    if(input$GroupVar=="No Group") {
+      boxplot(x=as.numeric(input$Variable), data=mtcars,
+              horizontal=input$Horizontal,
+              col=input$BoxplotColor)
+    } else{
+      boxplot(as.formula(formulaText()), data=mtcars,
+              horizontal=input$Horizontal,
+              col=input$BoxplotColor)
+    }
+  })
+
+```

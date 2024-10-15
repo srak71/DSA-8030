@@ -1,0 +1,24 @@
+---
+title: "Mtcars Shiny Flexdashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: scroll
+runtime: shiny
+---
+
+```{r, include=FALSE}
+library(ggplot2)
+```
+
+Inputs {.sidebar}
+------------------------------------
+
+```{r}
+
+#choose a variable
+selectInput(inputId = 'HistVariable', 
+            label = 'Select Variable for Histogram', 
+            choices = c("dep_delay", "arr_delay", "air_time", "distance"))
+
+```

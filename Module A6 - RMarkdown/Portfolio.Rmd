@@ -50,6 +50,9 @@ Utilized cryptographic primitives to design and implement a client application f
 # Programming Skills {.tabset}
 
 <span style="color: blue;">Programming Languages:</span>
+```{R fig.show='hold', echo=FALSE, out.width="7%", out.height="7%"}
+knitr::include_graphics(c('Python-logo.png', 'C-logo.png', 'Java-logo.png', 'Matlab-logo.png', 'GoLang-logo.png'))
+```
 
 - Python, C, Java, MATLAB: >10 yrs
 
@@ -58,36 +61,57 @@ Utilized cryptographic primitives to design and implement a client application f
 - Go: 3 yrs
 
 <span style="color: violet;">Statistical Languages:</span>
+```{R fig.show='hold', echo=FALSE, out.width="7%", out.height="7%"}
+knitr::include_graphics(c('MySQL-logo.png', 'R-logo.png', 'SAS-logo.png', 'SPSS-logo.png'))
+```
 
 - SQL/MySQL, R , SAS : 6yrs
 
 - SPSS: 2 yrs
 
 <span style="color: yellow;">Large Data Processing:</span>
+```{R fig.show='hold', echo=FALSE, out.width="7%", out.height="7%"}
+knitr::include_graphics('Apache-logo.png')
+```
 
 - (Apache) Hadoop, Hive, Airflow, HBase: 4yrs.
 
 <span style="color: lightgreen;">Neural Learning Frameworks:</span>
+```{R fig.show='hold', echo=FALSE, out.width="7%", out.height="7%"}
+knitr::include_graphics(c('PyTorch-logo.png', 'TensorFlow-logo.png'))
+```
 
 - PyTorch: 3 yrs
 
 - TensorFlow: 4 yrs
 
 <span style="color: brown;">Computer Security & Architecture:</span>
+```{R fig.show='hold', echo=FALSE, out.width="7%", out.height="7%"}
+knitr::include_graphics('x86-logo.png')
+```
 
 - x86: 3 yrs
 
 <span style="color: orange;">Productivity Tools:</span>
+```{R fig.show='hold', echo=FALSE, out.width="7%", out.height="7%"}
+knitr::include_graphics(c('Excel-logo.png', 'Sheets-logo.png'))
+```
 
 - Excel, Sheets: >10yrs
 
 <span style="color: red;">Visualization Tools:</span>
+```{R fig.show='hold', echo=FALSE, out.width="7%", out.height="7%"}
+knitr::include_graphics(c('Seaborn-logo.png', 'Ggplot2-logo.png', 'Tableau-logo.png'))
+```
 
 - seaborn, matplotlib, ggplot2, Tableau : 5 yrs
 
 ---
 
 # Links {.tabset}
+```{R fig.show='hold', echo=FALSE, out.width="7%", out.height="7%"}
+knitr::include_graphics(c('LinkedIn-logo.png', 'GitHub-logo.png'))
+```
 
 1. linkedIn: <https://www.linkedin.com/in/srak71/>
 
@@ -97,7 +121,7 @@ Utilized cryptographic primitives to design and implement a client application f
 
 # Resumè {.tabset}
 
-```{r out.width="100%", out.height="200%", echo=FALSE}
+```{R out.width="100%", out.height="200%", echo=FALSE}
 knitr::include_graphics("resume2.png")
 ```
 
@@ -106,3 +130,6 @@ knitr::include_graphics("resume2.png")
 # Contact Me {.tabset}
 
 Email: saransh707@gmail.com
+
+You can download the R Markdown source code of this document [here](Portfolio.Rmd).
+

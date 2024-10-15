@@ -1,0 +1,131 @@
+---
+title: "DSA 8030 - A7: Notes - Shiny part 1"
+output: html_document
+runtime: shiny
+---
+
+```{r warning=FALSE, message=FALSE}
+library(tidyverse)
+```
+
+# Drop-down menu
+
+```{r drop-down-input}
+
+selectInput(inputId='ExampleDropDown',
+            label='Please make a selection',
+            choices=list('Value 1'=1,
+                         'Value 2'=2,
+                         'Value 3'=3))
+
+renderPrint(input$ExampleDropDown)
+```
+
+# Slider input
+
+```{r slider-input}
+
+sliderInput(inputId='ExampleSlider',
+            label='Select a value',
+            min=0, max=10, value=3
+            )
+
+#create a two-sided slider
+sliderInput(inputId='ExampleSlider2',
+            label='Select a Range',
+            min=0, max=10, value=c(2,4)
+)
+```
+
+# Check Boxes
+
+```{r}
+checkboxInput(inputId='CheckBoxExample',
+              label='Check here')
+
+checkboxGroupInput(inputId = 'CheckBoxGroupExample', 
+                   label = 'Select all that apply', 
+                   choices = c('A', 'B', 'C'))
+
+```
+
+# Radio Buttons
+
+```{r}
+radioButtons(inputId = 'RadioButtonExample', 
+             label = 'Please select one', 
+             choices = c('A', 'B', 'C'))
+```
+
+# Date Input
+
+```{r}
+#enter a single date
+dateInput(inputId = 'DateExample', 
+          label = 'Date Selected')
+
+#enter date range
+dateRangeInput(inputId = 'DateRangeExample', 
+               label = 'Please select dates')
+
+#change format of date range
+dateRangeInput(inputId = 'DateRangeExample2', 
+               label = 'Please select dates', 
+               format = 'mm/dd/yyyy')
+```
+
+
+
+# Text Box input
+```{r text-input-output}
+textInput (inputId='TextInput', label='Enter Text')
+
+#text output
+renderPrint(input$TextInput)
+renderText(input$TextInput)
+
+textAreaInput(inputId = 'TextAreaExample', 
+              label = 'Enter block of text')
+```
+
+# Print Data Table 
+```{r data-tables}
+#for smaller datasets
+renderTable(mtcars)
+
+#for larger datasets
+renderDataTable(mtcars)
+
+#preferred display from DT package
+DT::renderDataTable(mtcars)
+```
+
+
+# Render plot
+
+```{r histogram}
+#choose a variable
+selectInput(inputId = 'Variable', 
+            label = 'Select variable to graph', 
+            choices = names(mtcars))
+
+#choose size of bin
+sliderInput(inputId = 'BinSize', 
+            label = 'Select bin size',
+            min = 5,max = 50, value = 25)
+
+#choose a color
+selectInput(inputId = 'Color', 
+            label = 'Choose a color', 
+            choices = colors())
+```
+
+
+```{r}
+#create histogram from inputs
+renderPlot(ggplot(mtcars, 
+                  aes_string(x=input$Variable)) + 
+  geom_histogram(bins=input$BinSize,
+                 fill=input$Color, col="white"))
+```
+
