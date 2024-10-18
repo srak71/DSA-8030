@@ -1,0 +1,80 @@
+---
+title: "Flights Data Analysis"
+author: "Saransh Rakshak"
+output: html_document
+date: "Due: 10/21/2024"
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+library(nycflights13)
+```
+
+
+## Analysis of Factors Affecting Flight Delays and Flight Times
+
+Air travel is an essential mode of transportation, with millions of passengers flying every day across the globe. However, flight delays remain a persistent issue, causing inconvenience to passengers and airlines alike. Understanding the factors that contribute to these delays and how different attributes—such as weather conditions and airplane characteristics—affect flight times can help mitigate some of these challenges.
+
+This R project data analysis will explore the variables that influence flight delays and flight times for departures from New York City's three major airports: John F. Kennedy (*JFK*), LaGuardia (*LGA*), and Newark (*EWR*). The dataset being used for this analysis is from the **nycflights13** package, which contains detailed information on all flights departing from these airports in 2013 (*flights*), along with corresponding weather conditions  (*weather*) and airplane details (*planes*). The data is provided by the **TidyVerse** package, and raw data can be found here: https://github.com/tidyverse/nycflights13.
+
+By integrating data on weather (temperature, wind speed, precipitation) and plane characteristics (year of manufacture, model), we aim to uncover patterns and relationships that contribute to delays and extended flight times.
+
+To begin our analysis, we will examine the variables contained within the dataset and explore their impact on key metrics such as departure delays, arrival delays, and overall flight time.
+
+```{r cleanup}
+# Clean flights data
+flights_clean <- flights %>%
+  filter(!is.na(dep_delay), !is.na(arr_delay), !is.na(air_time))
+
+# Rename column 'time_hour' in weather to 'time_hour_weather'
+colnames(weather)[colnames(weather) == 'time_hour'] <- 'time_hour_weather'
+
+# Join flights with weather data
+flights_weather <- flights_clean %>%
+  left_join(weather, by = c("year", "month", "day", "hour", "origin"))
+
+# Rename column 'year' in planes to 'year_manufactured'
+colnames(planes)[colnames(planes) == 'year'] <- 'year_manufactured'
+
+# Rename column 'engines' in planes to 'num_engines'
+colnames(planes)[colnames(planes) == 'engines'] <- 'num_engines'
+
+# Join plane data to flights
+flights_weather_planes <- flights_weather %>%
+  left_join(planes, by = "tailnum")
+
+dim(flights_weather_planes)
+names(flights_weather_planes)
+```
+
+Our initial analysis shows that our dataset contains 327,346 rows and 37 columns. Of these columns, we will focus our analysis on the following variables.
+
+  - <span style="color: blue;">*dep_delay*, *arr_delay*</span> : Departure and arrival delays, in minutes. Negative times represent early departures/arrivals.
+  
+  - <span style="color: blue;">*air_time*</span> : Amount of time spent in the air, in minutes.
+  
+  - <span style="color: blue;">*origin*</span> : The airport in NYC from which the flight departed (*JFK*, *LGA*, or *EWR*).
+  
+  - <span style="color: blue;">*dest*</span> : The destination airport.
+  
+  - <span style="color: blue;">*carrier*</span> : Two letter carrier abbreviation for the airline responsible for the flight.
+
+  - <span style="color: blue;">*temp*, *wind_speed*, *precip*, *visib*</span> : Weather conditions at time of departure, including temperature (°F), wind speed (MPH), precipitation (inches), and visibility (miles).
+  
+  - <span style="color: blue;">*year_manufactured*, *model*, *num_engines*, *speed*, *engine*</span> : Details regarding plane that took the journey, such as its model, year of manufacture, number of engines, average cruising speed (MPH), and type of engine.
+  
+
+
+Our data has been cleaned by first removing all rows containing NA values for *dep_delay*, *arr_delay*, and *air_time*. Next, **weather** data was joined to our **flights** dataframe. Prior to this, **weather**'s column *time_hour* is renamed to *time_hour_weather* to avoid conflicts with **flights** dataframe column *time_hour*. **Weather** is left joined to **flights** to preserve data from **flights**, and is joined by columns *year*, *month*, *day*, *hour*, and *origin*. Finally, data regarding details about **planes** for each corresponding flight is joined to our **flights** dataframe. Prior to this, **planes** column *year* is renamed to *year_manufactured* to avoid conflicts with **flights** dataframe column *year*. **Planes** is left joined to **flights** to preserve data from **flights**, and is joined by *tailnum*.
+
+
+
+```{R}
+flights_weather_planes
+```
+
+
+
+

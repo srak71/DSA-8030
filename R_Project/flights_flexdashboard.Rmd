@@ -1,0 +1,178 @@
+---
+title: "Flights Flexdashboard"
+author: "Saransh Rakshak"
+date: "Due 10/21/2024"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: scroll
+runtime: shiny
+---
+
+```{r, include=FALSE}
+library(ggplot2)
+library(nycflights13)
+library(dplyr)
+```
+
+Inputs {.sidebar}
+------------------------------------
+
+```{r}
+
+#choose a variable
+selectInput(inputId = 'Variable', 
+            label = 'Select Variable for Histogram', 
+            choices = c("distance", "air_time", "dep_delay", "arr_delay"))
+
+```
+
+### Histogram Inputs
+```{r}
+
+# slide for bin size
+sliderInput(inputId = 'BinSize', 
+            label = 'Select Bin Size', 
+            min = 5, max = 50, value = 25)
+
+#choose a color for histogram
+selectInput(inputId = 'HistColor', 
+            label = 'Choose Histogram Color', 
+            choices = colors(), 
+            selected = "skyblue")
+```
+
+### Boxplot Inputs
+
+```{r}
+selectInput(inputId = "GroupVar", 
+            label = "Group Variable", 
+            choices = cbind("carrier","origin", "dest", "No Group"),
+            selected = "carrier"
+            )
+
+# Check Input for Specific Group Values
+uiOutput("GroupValuesUI")
+
+# Select color for boxplot
+selectInput(inputId = "BoxplotColor", 
+            label = "Choose a boxplot color", 
+            choices = colors(),
+            selected = "tomato")
+
+#check box for horizontal or vertical
+checkboxInput(inputId = "Horizontal", 
+              label = "Check for Horizontal Boxplot", 
+              value = TRUE)
+
+```
+
+
+Row {data-height=215}
+-------------------------------
+
+### Description of Data
+
+```{r echo=FALSE}
+#variable descriptions
+descr <- c(dep_delay="Departure delays, in minutes. Negative times represent early departures.", 
+           arr_delay="Arrival delays, in minutes. Negative times represent early arrivals.",
+           air_time="Amount of time spent in the air, in minutes.",
+           distance="Distance between airports, in miles.",
+           carrier="Two letter carrier abbreviation. See airlines to get name.",
+           origin="Starting position of flight.",
+           dest="Final landing location of flight."
+           )
+```
+
+```{r}
+#print description
+renderUI({
+  str1 <- "Data Description:" 
+  str2 <- "On-time data for all flights that departed NYC (i.e. JFK, LGA or EWR) in 2013."
+  str3 <- paste("You have selected the variable:", input$Variable)
+  str4 <- paste("Description of Variable:", descr[input$Variable])
+  bl <- paste(" ")
+  str5 <- paste("You have grouped by the variable:", input$GroupVar)
+  str6 <- paste("Description of Group:", descr[input$GroupVar])
+  
+  HTML(paste(str1, str2, bl, str3, str4, bl, str5, str6, sep='<br/>'))
+
+})
+
+```
+
+Row {.tabset .tabset-fade}
+---------------------------------
+
+### Histogram 
+
+```{r}
+#create histogram from inputs
+renderPlot({
+  ggplot(flights, aes_string(x = input$Variable)) +
+    geom_histogram(binwidth = input$BinSize, 
+                   fill = input$HistColor, color = "black") +
+    labs(title = paste("Histogram of", input$Variable), 
+         x = input$Variable, y = "Count") +
+    theme_minimal()
+})
+
+```
+
+
+### Boxplot
+
+```{r}
+
+# Dynamically generate checkbox input for group values
+output$GroupValuesUI <- renderUI({
+  req(input$GroupVar != "No Group")  # Only show if a group variable is selected
+  unique_values <- unique(flights[[input$GroupVar]])  # Get unique values
+  checkboxGroupInput(
+    inputId = "SelectedGroups",
+    label = paste("Select", input$GroupVar, "Values"),
+    choices = unique_values,
+    selected = unique_values  # Default: All selected
+  )
+})
+
+# Reactive formula for boxplot
+formulaText <- reactive({
+  paste(input$Variable, "~", input$GroupVar)
+})
+
+# Render the boxplot based on inputs
+renderPlot({
+  # Filter data based on selected group values
+  flights_filtered <- flights %>%
+    filter(
+      (!is.na(.data[[input$Variable]])) & 
+      (input$GroupVar == "No Group" | .data[[input$GroupVar]] %in% input$SelectedGroups)
+    )
+
+  # Generate the boxplot
+  if (input$GroupVar == "No Group") {
+    boxplot(
+      flights_filtered[[input$Variable]],
+      horizontal = input$Horizontal,
+      col = input$BoxplotColor,
+      main = paste("Boxplot of", input$Variable),
+      ylab = ifelse(input$Horizontal, input$Variable, ""),
+      xlab = ifelse(input$Horizontal, "", input$Variable)
+    )
+  } else {
+    boxplot(
+      as.formula(formulaText()), 
+      data = flights_filtered, 
+      horizontal = input$Horizontal,
+      col = input$BoxplotColor,
+      main = paste("Boxplot of", input$Variable, "by", input$GroupVar),
+      ylab = ifelse(input$Horizontal, input$GroupVar, input$Variable),
+      xlab = ifelse(input$Horizontal, input$Variable, input$GroupVar),
+      las = 2  # Rotate axis labels if needed
+    )
+  }
+})
+
+```

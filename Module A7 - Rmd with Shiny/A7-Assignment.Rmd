@@ -45,7 +45,7 @@ selectInput(inputId = 'HistColor',
 ```{r}
 selectInput(inputId = "GroupVar", 
             label = "Group Variable", 
-            choices = cbind("carrier","origin", "dest"),
+            choices = cbind("carrier","origin", "dest", "No Group"),
             selected = "carrier"
             )
 
@@ -172,6 +172,5 @@ renderPlot({
     )
   }
 })
-
 
 ```
