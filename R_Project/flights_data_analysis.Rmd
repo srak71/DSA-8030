@@ -1,40 +1,73 @@
 ---
-title: "Flights Data Analysis"
+title: "Analysis of Factors Affecting Flight Delays and Flight Times"
 author: "Saransh Rakshak"
-output: html_document
 date: "Due: 10/21/2024"
+output: 
+  html_document:
+    df_print: paged
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    number_sections: false
 ---
 
-```{r setup, include=FALSE}
+# Introduction
+
+Air travel is an essential mode of transportation, with millions of passengers flying every day across the globe. However, flight delays remain a persistent issue, causing inconvenience to passengers and airlines alike. Understanding the factors that contribute to these delays and how different attributes—such as weather conditions and airplane characteristics—affect flight times can help mitigate some of these challenges.
+
+This R project data analysis will explore the variables that influence flight delays and flight times for departures from New York City's three major airports: John F. Kennedy (*JFK*), LaGuardia (*LGA*), and Newark (*EWR*). The dataset being used for this analysis is from the *nycflights13* library, which contains detailed information on all flights departing from these airports in 2013 (**flights**), along with corresponding weather conditions  (**weather**) and airplane details (**planes**). The data is provided by the *TidyVerse* package, and raw data can be found here: https://github.com/tidyverse/nycflights13.
+
+By integrating data on weather (temperature, wind speed, precipitation) and plane characteristics (year of manufacture, model), we aim to uncover patterns and relationships that contribute to delays and extended flight times.
+
+---
+
+# R Packages
+
+Packages used for my analysis include *ggplot* for plotting, *dplyr* for filtering and syntax, and *tidyverse* and its associated *nycflights13* library for data.
+
+```{r setup}
 library(ggplot2)
 library(dplyr)
 library(tidyverse)
 library(nycflights13)
 ```
 
+---
 
-## Analysis of Factors Affecting Flight Delays and Flight Times
-
-Air travel is an essential mode of transportation, with millions of passengers flying every day across the globe. However, flight delays remain a persistent issue, causing inconvenience to passengers and airlines alike. Understanding the factors that contribute to these delays and how different attributes—such as weather conditions and airplane characteristics—affect flight times can help mitigate some of these challenges.
-
-This R project data analysis will explore the variables that influence flight delays and flight times for departures from New York City's three major airports: John F. Kennedy (*JFK*), LaGuardia (*LGA*), and Newark (*EWR*). The dataset being used for this analysis is from the **nycflights13** package, which contains detailed information on all flights departing from these airports in 2013 (*flights*), along with corresponding weather conditions  (*weather*) and airplane details (*planes*). The data is provided by the **TidyVerse** package, and raw data can be found here: https://github.com/tidyverse/nycflights13.
-
-By integrating data on weather (temperature, wind speed, precipitation) and plane characteristics (year of manufacture, model), we aim to uncover patterns and relationships that contribute to delays and extended flight times.
+# Data Wrangling
 
 To begin our analysis, we will examine the variables contained within the dataset and explore their impact on key metrics such as departure delays, arrival delays, and overall flight time.
 
+Our **flights_data** frame has been cleaned by first removing all rows containing 'NA' values for *dep_delay*, *arr_delay*, and *air_time*. This data is again filtered to include only those that have had departure or arrival delays, as our analysis is focused on factors affecting delay time. Column *was_delayed* is added as a boolean column with values of TRUE for flights that had an arrival delay and FALSE for those that arrived on time, regardless of departure delay.
+
 ```{r cleanup}
 # Clean flights data
-flights_clean <- flights %>%
-  filter(!is.na(dep_delay), !is.na(arr_delay), !is.na(air_time))
+flights_data <- flights %>%
+  filter(!is.na(dep_delay), !is.na(arr_delay), !is.na(air_time)) %>%
+  mutate(was_delayed = (arr_delay > 0))
+```
 
+Now, we will join additional data to **flights_data** to add more information for analysis. First, **airlines** is merged on *carrier* to add information about airline names. Next, **weather** data was joined to our **flights_data** dataframe. Prior to this join, **weather**'s column *time_hour* is renamed to *time_hour_weather* to avoid conflicts with **flights** dataframe column *time_hour*. **Weather** is left joined to **flights_data** to preserve data from **flights**, and is joined by columns *year*, *month*, *day*, *hour*, and *origin*. Finally, data regarding details about **planes** for each corresponding flight is joined to our **flights_data**. Prior to this join, **planes** column *year* is renamed to *year_manufactured* to avoid conflicts with **flights** dataframe column *year*. **Planes** is left joined to **flights_data** to preserve data from **flights**, and is joined by *tailnum*.
+
+```{r mergeairlines}
+# Rename column 'name' in airlines to 'carrier_name'
+colnames(airlines)[colnames(airlines) == 'name'] <- 'carrier_name'
+
+# Join flights with airline data
+flights_data <- flights_data %>%
+  left_join(airlines, by = "carrier")
+```
+
+```{r mergeweather}
 # Rename column 'time_hour' in weather to 'time_hour_weather'
 colnames(weather)[colnames(weather) == 'time_hour'] <- 'time_hour_weather'
 
 # Join flights with weather data
-flights_weather <- flights_clean %>%
+flights_data <- flights_data %>%
   left_join(weather, by = c("year", "month", "day", "hour", "origin"))
+```
 
+```{r mergeplanes}
 # Rename column 'year' in planes to 'year_manufactured'
 colnames(planes)[colnames(planes) == 'year'] <- 'year_manufactured'
 
@@ -42,16 +75,18 @@ colnames(planes)[colnames(planes) == 'year'] <- 'year_manufactured'
 colnames(planes)[colnames(planes) == 'engines'] <- 'num_engines'
 
 # Join plane data to flights
-flights_weather_planes <- flights_weather %>%
+flights_data <- flights_data %>%
   left_join(planes, by = "tailnum")
 
-dim(flights_weather_planes)
-names(flights_weather_planes)
+dim(flights_data)
+names(flights_data)
 ```
 
-Our initial analysis shows that our dataset contains 327,346 rows and 37 columns. Of these columns, we will focus our analysis on the following variables.
+Our initial analysis shows that our dataset contains 327,346 rows and 39 columns. Of these columns, we will focus our analysis on the following variables.
 
   - <span style="color: blue;">*dep_delay*, *arr_delay*</span> : Departure and arrival delays, in minutes. Negative times represent early departures/arrivals.
+  
+  - <span style="color: blue;">*was_delayed*</span> : Boolean column, equals True if there was a delay in arrival, else False.
   
   - <span style="color: blue;">*air_time*</span> : Amount of time spent in the air, in minutes.
   
@@ -60,20 +95,208 @@ Our initial analysis shows that our dataset contains 327,346 rows and 37 columns
   - <span style="color: blue;">*dest*</span> : The destination airport.
   
   - <span style="color: blue;">*carrier*</span> : Two letter carrier abbreviation for the airline responsible for the flight.
+  
+  - <span style="color: blue;">*carrier_name*</span> : Full name for the airline responsible for the flight.
 
-  - <span style="color: blue;">*temp*, *wind_speed*, *precip*, *visib*</span> : Weather conditions at time of departure, including temperature (°F), wind speed (MPH), precipitation (inches), and visibility (miles).
+  - <span style="color: blue;">*temp*, *precip*, *visib*</span> : Weather conditions at time of departure, including temperature (°F), precipitation (inches), and visibility (miles).
   
   - <span style="color: blue;">*year_manufactured*, *model*, *num_engines*, *speed*, *engine*</span> : Details regarding plane that took the journey, such as its model, year of manufacture, number of engines, average cruising speed (MPH), and type of engine.
   
 
+Upon reviewing our dataset, we can see that it is semi-cleaned. All rows contain values for our column variables *dep_delay*, *arr_delay*, and *air_time*. For our merged columns from **airlines**, **weather** and **planes**, there are instances where certain extra column values contain missing data (represented by 'NA' in our system). When conducting analysis on these columns, we ensure that only data points from samples which do not have any missing information are considered, and those with 'NA' are filtered out. This approach is taken because there is currently no new data available to fill in the gaps left by these missing values.
 
-Our data has been cleaned by first removing all rows containing NA values for *dep_delay*, *arr_delay*, and *air_time*. Next, **weather** data was joined to our **flights** dataframe. Prior to this, **weather**'s column *time_hour* is renamed to *time_hour_weather* to avoid conflicts with **flights** dataframe column *time_hour*. **Weather** is left joined to **flights** to preserve data from **flights**, and is joined by columns *year*, *month*, *day*, *hour*, and *origin*. Finally, data regarding details about **planes** for each corresponding flight is joined to our **flights** dataframe. Prior to this, **planes** column *year* is renamed to *year_manufactured* to avoid conflicts with **flights** dataframe column *year*. **Planes** is left joined to **flights** to preserve data from **flights**, and is joined by *tailnum*.
+---
 
+# Flights Analysis
 
+We will being our analysis by looking at **flights** data regarding carrier and origin.
 
-```{R}
-flights_weather_planes
+## 1. Carrier
+
+From Fig. 1A, it is clear that some carriers have significantly higher counts of delays than others. Carriers like United Airlines and American Airlines have the highest number of delays. This could be attributed to the number of flights they operate or operational challenges unique to these carriers. The data reveals that carriers with higher traffic volumes tend to have a larger share of delays, as their flight schedules are more complex and susceptible to disruptions. While the count provides raw numbers, Fig. 1B presents a normalized view by showing the frequency of delays relative to the total number of flights operated by each carrier. It offers a fairer comparison, as it accounts for the differing sizes of the airlines. Interestingly, some carriers with fewer total delays have higher delay frequencies, indicating they experience delays more often relative to their size. Low-cost carriers or smaller regional airlines sometimes exhibit higher delay frequencies, suggesting that operational inefficiencies may be more common for these airlines despite handling fewer flights. Together, these two figures provide insights into both the absolute and proportional performance of airlines in terms of delays, highlighting operational challenges faced by larger carriers and frequent delays within smaller airlines.
+
+```{r carrierdelaycount, echo = FALSE}
+flights_carrier_count <- flights_data %>%
+  group_by(carrier) %>%
+  filter(was_delayed == TRUE) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+
+ggplot(data = flights_carrier_count, aes(x = carrier, y = count, fill = carrier)) + 
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(title = "(Fig. 1A) Count of Delay by Carrier", x = "Carrier", y = "Count") + 
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = count), vjust = -0.5, size = 4)
 ```
+
+```{r carrrierdelayfrequency, echo = FALSE}
+flights_delay_freq <- flights_data %>%
+  group_by(carrier) %>%
+  summarise(delayed = sum(was_delayed, na.rm = TRUE),
+            notDelayed = sum(!was_delayed, na.rm = TRUE)) %>%
+  mutate(delay_freq = 100 * delayed / (delayed + notDelayed)) %>%
+  mutate(delay_freq = round(delay_freq, 1))
+
+ggplot(data = flights_delay_freq, aes(x = carrier, y = delay_freq, fill = carrier)) +
+  geom_bar(stat = "identity") +
+  labs(title = "(Fig. 1B) Frequency of Delay by Carrier", x = "Carrier", y = "% of Delayed Flights") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  geom_text(aes(label = paste0(delay_freq, "%")), vjust = -0.5, size = 4)
+```
+
+## 2. Origin
+
+Fig. 2A reveals that EWR (Newark Liberty International Airport) has the highest total number of delayed flights. The volume of delays at EWR surpasses those at both JFK and LGA. Newark's high delay count may stem from its larger volume of traffic and greater complexity in managing both domestic and international flights, contributing to more frequent operational delays. Similarly, EWR also leads in the frequency of delays (Fig. 2B), indicating that a significant proportion of flights departing from Newark experience delays. This finding highlights that not only does EWR handle a large number of delayed flights, but the percentage of flights delayed relative to the total number of flights is also the highest among the three airports. This suggests that Newark faces chronic issues affecting its punctuality, potentially due to operational inefficiencies, high traffic volumes, or congestion.
+
+```{r origindelaycount, echo = FALSE}
+flights_origin_count <- flights_data %>%
+  group_by(origin) %>%
+  filter(was_delayed == TRUE) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+
+ggplot(data = flights_origin_count, aes(x = origin, y = count, fill = origin)) + 
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(title = "(Fig. 2A) Count of Delay by Origin", x = "Origin", y = "Count") + 
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = count), vjust = -0.5, size = 4)
+```
+
+
+```{r origindelayfrequency, echo = FALSE}
+flights_origin_freq <- flights_data %>%
+  group_by(origin) %>%
+  summarise(delayed = sum(was_delayed, na.rm = TRUE),
+            notDelayed = sum(!was_delayed, na.rm = TRUE)) %>%
+  mutate(delay_freq = 100 * delayed / (delayed + notDelayed)) %>%
+  mutate(delay_freq = round(delay_freq, 1))
+
+ggplot(data = flights_origin_freq, aes(x = origin, y = delay_freq, fill = origin)) +
+  geom_bar(stat = "identity") +
+  labs(title = "(Fig. 2B) Frequency of Delay by Origin", x = "Origin", y = "% of Delayed Flights") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  geom_text(aes(label = paste0(delay_freq, "%")), vjust = -0.5, size = 4)
+```
+
+---
+
+# Weather Analysis
+
+We will now incorporate **weather** data in our delay analysis. 
+
+## 3. Temperature
+
+Our dataset **flights_data** has some rows with 'NA' values for *temp*. For this analysis, those rows will be filtered out.
+
+Fig. 3A reveals that flight delays generally increase in extreme weather conditions. Delays tend to be higher when temperatures drop below 30°F and when they rise above 85°F. These findings suggest that both very cold and very hot temperatures can contribute to disruptions in flight operations, likely due to issues such as de-icing, reduced aircraft performance, or weather-related complications like thunderstorms in high heat. When examining how different airlines are affected by temperature changes, the results show distinct patterns among various carriers (Fig. 3B). Airlines such as Endeavor (*9E*), American Airlines (*AA*), JetBlue (*B6*), Frontier (*F9*), Hawaiian Airlines (*HA*), and US Airways (*US*) exhibit particularly high delays during cold weather (below 30°F). In contrast, carriers like AirTran (*FL*) and SkyWest Airlines (*OO*) tend to experience higher delays in hot temperatures (above 85°F). This suggests that certain airlines may have operational vulnerabilities in extreme weather, possibly due to factors like fleet composition, hub location, or preparedness for adverse weather conditions. The analysis by airport of origin (Fig. 3C) highlights significant differences in how temperature impacts delays. Newark (*EWR*) stands out as the airport most affected by extreme temperatures, showing the greatest change in delay times in both very cold and very hot weather. This may be due to *EWR*'s operational characteristics, weather patterns in its vicinity, or infrastructure challenges. *JFK* and *LGA* also show increased delays in extreme conditions, but the effects are less pronounced than at *EWR*.
+
+Our findings suggest that flight delays increase significantly in extreme temperatures. The most affected airlines in cold weather (*9E*, *AA*, *B6*, *F9*, *HA*, and *US*) may need to improve their winter operational strategies, while airlines like *FL* and *OO* could benefit from addressing challenges in hot weather conditions. Newark (*EWR*) is the most sensitive to temperature changes, indicating potential for focused improvements in weather-resilient infrastructure or procedures at this airport.
+
+```{r delaytemp, echo = FALSE}
+flights_temp_mean <- flights_data %>%
+  filter(!is.na(temp)) %>%
+  group_by(temp) %>%
+  summarise(mean_dep_delay = mean(dep_delay, na.rm = TRUE), .groups = "drop")
+
+ggplot(data = flights_temp_mean, aes(x = temp, y = mean_dep_delay)) +
+  geom_line() +
+  labs(title = "(Fig. 3A) Mean Departure Delay by Temperature", x = "Temperature (°F)", y = "Mean Departure Delay (minutes)") +
+  theme_minimal()
+```
+
+
+```{r delaytempcarrier, echo = FALSE}
+# Filter for non-null 'temp' values, group by temp and carrier 
+flights_temp_carrier_mean <- flights_data %>%
+  filter(!is.na(temp)) %>%
+  group_by(carrier, temp) %>%
+  summarise(mean_dep_delay = mean(dep_delay, na.rm = TRUE), .groups = "drop")
+
+# Create the line chart using ggplot
+ggplot(data = flights_temp_carrier_mean, aes(x = temp, y = mean_dep_delay)) +
+  geom_line() +
+  labs(title = "(Fig. 3B) Mean Departure Delay by Temperature and Carrier", 
+       x = "Temperature (°F)", y = "Mean Departure Delay (minutes)") +
+  theme_minimal() +
+  facet_wrap(~carrier)
+```
+
+```{r delaytemporigin, echo = FALSE}
+# Filter for non-null 'temp' values, group by temp and origin 
+flights_temp_origin_mean <- flights_data %>%
+  filter(!is.na(temp)) %>%
+  group_by(origin, temp) %>%
+  summarise(mean_dep_delay = mean(dep_delay, na.rm = TRUE), .groups = "drop")
+
+# Create the line chart using ggplot
+ggplot(data = flights_temp_origin_mean, aes(x = temp, y = mean_dep_delay)) +
+  geom_line() +
+  labs(title = "(Fig. 3C) Mean Departure Delay by Temperature and Origin", 
+       x = "Temperature (°F)", y = "Mean Departure Delay (minutes)") +
+  theme_minimal() +
+  facet_wrap(~origin)
+```
+
+
+## 4. Precipitation
+
+Our dataset **flights_data** has some rows with 'NA' values for *precip*. For this analysis, those rows will be filtered out.
+
+Fig. 4A shows a clear trend: as precipitation increases, so do flight departure delays. This is expected since rain, snow, and other forms of precipitation can disrupt airport operations, slow down runway traffic, and affect aircraft performance. For instance, wet or icy runways necessitate longer takeoff and landing times, and heavy precipitation often leads to delays in both air traffic control and ground services. However, it’s important to note that the dataset contains relatively few data points for higher precipitation levels. The total number of observations for this analysis is only 55, with much fewer samples in cases of heavy precipitation. This limited data makes it difficult to draw strong conclusions about the exact impact of severe weather on delays, as the trends observed may not fully represent all conditions. The small sample size suggests that while there is a general relationship between precipitation and delays, further data collection would be necessary to make more reliable and detailed observations about the effects of heavy rain or snow on flight departures.
+
+```{r delayprecip, echo = FALSE}
+flights_precip_mean <- flights_data %>%
+  filter(!is.na(precip)) %>%
+  group_by(precip) %>%
+  summarise(mean_dep_delay = mean(dep_delay, na.rm = TRUE))
+
+dim(flights_precip_mean)
+
+ggplot(data = flights_precip_mean, aes(x = precip, y = mean_dep_delay)) +
+  geom_line() +
+  labs(title = "(Fig. 4A) Mean Departure Delay by Precipitation", x = "Precipitation (in)", y = "Mean Departure Delay (minutes)") +
+  theme_minimal()
+```
+
+
+## 5. Visibility
+
+Our dataset **flights_data** has some rows with 'NA' values for *visib*. For this analysis, those rows will be filtered out.
+
+```{r delayvisib, echo = FALSE}
+flights_visib_mean <- flights_data %>%
+  filter(!is.na(visib)) %>%
+  group_by(visib) %>%
+  summarise(mean_dep_delay = mean(dep_delay, na.rm = TRUE))
+
+dim(flights_visib_mean)
+
+ggplot(data = flights_visib_mean, aes(x = visib, y = mean_dep_delay)) +
+  geom_line() +
+  labs(title = "(Fig. 5A) Mean Departure Delay by Visibility", x = "Visibility (mi)", y = "Mean Departure Delay (minutes)") +
+  theme_minimal()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
