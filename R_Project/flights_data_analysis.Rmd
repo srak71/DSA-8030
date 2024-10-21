@@ -11,28 +11,39 @@ output:
     number_sections: false
 ---
 
+::: {style="text-align: center;"}
+![](airport_img.jpg){width="100%"}
+:::
+
+::: {include="C:/Users/sar-home/Clemson/DSA-8030/R_Project/flights_flexdashboard.Rmd"}
+:::
+
+
+------------------------------------------------------------------------
+
 # Introduction
 
-Air travel is an essential mode of transportation, with millions of passengers flying every day across the globe. However, flight delays remain a persistent issue, causing inconvenience to passengers and airlines alike. Understanding the factors that contribute to these delays and how different attributes—such as weather conditions and airplane characteristics—affect flight times can help mitigate some of these challenges.
+Air travel is an essential mode of transportation, with millions of passengers flying every day across the globe. However, flight delays remain a persistent issue, causing inconvenience to passengers and airlines alike. Understanding the factors that contribute to these delays and how different attributes like weather conditions and airplane characteristics, affect flight times can help mitigate some of these challenges.
 
-This R project data analysis will explore the variables that influence flight delays and flight times for departures from New York City's three major airports: John F. Kennedy (*JFK*), LaGuardia (*LGA*), and Newark (*EWR*). The dataset being used for this analysis is from the *nycflights13* library, which contains detailed information on all flights departing from these airports in 2013 (**flights**), along with corresponding weather conditions  (**weather**) and airplane details (**planes**). The data is provided by the *TidyVerse* package, and raw data can be found here: https://github.com/tidyverse/nycflights13.
+This R project data analysis explores the variables that influence flight delays and flight times for departures from New York City's three major airports: John F. Kennedy (*JFK*), LaGuardia (*LGA*), and Newark (*EWR*). The dataset being used for this analysis is from the *nycflights13* library, which contains detailed information on all flights departing from these airports in 2013 (**flights**), along with corresponding weather conditions (**weather**) and airplane details (**planes**). The data is provided by the *TidyVerse* package, and raw data can be found here: <https://github.com/tidyverse/nycflights13>.
 
 By integrating data on weather (temperature, wind speed, precipitation) and plane characteristics (year of manufacture, model), we aim to uncover patterns and relationships that contribute to delays and extended flight times.
 
----
+------------------------------------------------------------------------
 
 # R Packages
 
-Packages used for my analysis include *ggplot* for plotting, *dplyr* for filtering and syntax, and *tidyverse* and its associated *nycflights13* library for data.
+Packages used for my analysis include *ggplot* for plotting, *dplyr* for filtering and syntax, *htmlTable* for table generation, and *tidyverse* and its associated *nycflights13* library for data.
 
 ```{r setup}
 library(ggplot2)
 library(dplyr)
+library(htmlTable)
 library(tidyverse)
 library(nycflights13)
 ```
 
----
+------------------------------------------------------------------------
 
 # Data Wrangling
 
@@ -84,28 +95,27 @@ names(flights_data)
 
 Our initial analysis shows that our dataset contains 327,346 rows and 39 columns. Of these columns, we will focus our analysis on the following variables.
 
-  - <span style="color: blue;">*dep_delay*, *arr_delay*</span> : Departure and arrival delays, in minutes. Negative times represent early departures/arrivals.
-  
-  - <span style="color: blue;">*was_delayed*</span> : Boolean column, equals True if there was a delay in arrival, else False.
-  
-  - <span style="color: blue;">*air_time*</span> : Amount of time spent in the air, in minutes.
-  
-  - <span style="color: blue;">*origin*</span> : The airport in NYC from which the flight departed (*JFK*, *LGA*, or *EWR*).
-  
-  - <span style="color: blue;">*dest*</span> : The destination airport.
-  
-  - <span style="color: blue;">*carrier*</span> : Two letter carrier abbreviation for the airline responsible for the flight.
-  
-  - <span style="color: blue;">*carrier_name*</span> : Full name for the airline responsible for the flight.
+-   [*dep_delay*, *arr_delay*]{style="color: blue;"} : Departure and arrival delays, in minutes. Negative times represent early departures/arrivals.
 
-  - <span style="color: blue;">*temp*, *precip*, *visib*</span> : Weather conditions at time of departure, including temperature (°F), precipitation (inches), and visibility (miles).
-  
-  - <span style="color: blue;">*year_manufactured*, *model*, *num_engines*, *speed*, *engine*</span> : Details regarding plane that took the journey, such as its model, year of manufacture, number of engines, average cruising speed (MPH), and type of engine.
-  
+-   [*was_delayed*]{style="color: blue;"} : Boolean column, equals True if there was a delay in arrival, else False.
+
+-   [*air_time*]{style="color: blue;"} : Amount of time spent in the air, in minutes.
+
+-   [*origin*]{style="color: blue;"} : The airport in NYC from which the flight departed (*JFK*, *LGA*, or *EWR*).
+
+-   [*dest*]{style="color: blue;"} : The destination airport.
+
+-   [*carrier*]{style="color: blue;"} : Two letter carrier abbreviation for the airline responsible for the flight.
+
+-   [*carrier_name*]{style="color: blue;"} : Full name for the airline responsible for the flight.
+
+-   [*temp*, *precip*, *visib*]{style="color: blue;"} : Weather conditions at time of departure, including temperature (°F), precipitation (inches), and visibility (miles).
+
+-   [*year_manufactured*, *model*, *num_engines*, *speed*, *engine*]{style="color: blue;"} : Details regarding plane that took the journey, such as its model, year of manufacture, number of engines, average cruising speed (MPH), and type of engine.
 
 Upon reviewing our dataset, we can see that it is semi-cleaned. All rows contain values for our column variables *dep_delay*, *arr_delay*, and *air_time*. For our merged columns from **airlines**, **weather** and **planes**, there are instances where certain extra column values contain missing data (represented by 'NA' in our system). When conducting analysis on these columns, we ensure that only data points from samples which do not have any missing information are considered, and those with 'NA' are filtered out. This approach is taken because there is currently no new data available to fill in the gaps left by these missing values.
 
----
+------------------------------------------------------------------------
 
 # Flights Analysis
 
@@ -113,9 +123,13 @@ We will being our analysis by looking at **flights** data regarding carrier and 
 
 ## 1. Carrier
 
-From Fig. 1A, it is clear that some carriers have significantly higher counts of delays than others. Carriers like United Airlines and American Airlines have the highest number of delays. This could be attributed to the number of flights they operate or operational challenges unique to these carriers. The data reveals that carriers with higher traffic volumes tend to have a larger share of delays, as their flight schedules are more complex and susceptible to disruptions. While the count provides raw numbers, Fig. 1B presents a normalized view by showing the frequency of delays relative to the total number of flights operated by each carrier. It offers a fairer comparison, as it accounts for the differing sizes of the airlines. Interestingly, some carriers with fewer total delays have higher delay frequencies, indicating they experience delays more often relative to their size. Low-cost carriers or smaller regional airlines sometimes exhibit higher delay frequencies, suggesting that operational inefficiencies may be more common for these airlines despite handling fewer flights. Together, these two figures provide insights into both the absolute and proportional performance of airlines in terms of delays, highlighting operational challenges faced by larger carriers and frequent delays within smaller airlines.
+From Fig. 1A, it is clear that some carriers have significantly higher counts of delays than others. Carriers like United Airlines and American Airlines have the highest number of delays. This could be attributed to the number of flights they operate or operational challenges unique to these carriers. The data reveals that carriers with higher traffic volumes have a larger share of delays, since their flight schedules may be more complex and susceptible to disruptions.
 
-```{r carrierdelaycount, echo = FALSE}
+While the count provides raw numbers, Fig. 1B presents a normalized view by showing the frequency of delays relative to the total number of flights operated by each carrier. It offers a fairer comparison, as it accounts for the differing sizes of the airlines. Interestingly, some carriers with fewer total delays have higher delay frequencies, indicating they experience delays more often relative to their size. Low-cost carriers or smaller regional airlines sometimes exhibit higher delay frequencies, suggesting that operational inefficiencies may be more common for these airlines despite handling fewer flights.
+
+Together, these two figures provide insights into both the absolute and proportional performance of airlines in terms of delays, highlighting operational challenges faced by larger carriers and frequent delays within smaller airlines.
+
+```{r carrierdelaycount}
 flights_carrier_count <- flights_data %>%
   group_by(carrier) %>%
   filter(was_delayed == TRUE) %>%
@@ -126,12 +140,15 @@ ggplot(data = flights_carrier_count, aes(x = carrier, y = count, fill = carrier)
   geom_bar(stat = "identity") +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5)) +
-  labs(title = "(Fig. 1A) Count of Delay by Carrier", x = "Carrier", y = "Count") + 
+  labs(title = "(Fig. 1A) Count of Delay by Carrier",
+       x = "Carrier",
+       y = "Count"
+       ) + 
   geom_bar(stat = "identity") +
   geom_text(aes(label = count), vjust = -0.5, size = 4)
 ```
 
-```{r carrrierdelayfrequency, echo = FALSE}
+```{r carrrierdelayfrequency}
 flights_delay_freq <- flights_data %>%
   group_by(carrier) %>%
   summarise(delayed = sum(was_delayed, na.rm = TRUE),
@@ -141,17 +158,24 @@ flights_delay_freq <- flights_data %>%
 
 ggplot(data = flights_delay_freq, aes(x = carrier, y = delay_freq, fill = carrier)) +
   geom_bar(stat = "identity") +
-  labs(title = "(Fig. 1B) Frequency of Delay by Carrier", x = "Carrier", y = "% of Delayed Flights") +
+  labs(title = "(Fig. 1B) Frequency of Delay by Carrier",
+       x = "Carrier",
+       y = "% of Delayed Flights"
+       ) +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5)) +
   geom_text(aes(label = paste0(delay_freq, "%")), vjust = -0.5, size = 4)
 ```
 
+<br>
+
 ## 2. Origin
 
-Fig. 2A reveals that EWR (Newark Liberty International Airport) has the highest total number of delayed flights. The volume of delays at EWR surpasses those at both JFK and LGA. Newark's high delay count may stem from its larger volume of traffic and greater complexity in managing both domestic and international flights, contributing to more frequent operational delays. Similarly, EWR also leads in the frequency of delays (Fig. 2B), indicating that a significant proportion of flights departing from Newark experience delays. This finding highlights that not only does EWR handle a large number of delayed flights, but the percentage of flights delayed relative to the total number of flights is also the highest among the three airports. This suggests that Newark faces chronic issues affecting its punctuality, potentially due to operational inefficiencies, high traffic volumes, or congestion.
+Fig. 2A reveals that *EWR* (Newark Liberty International Airport) has the highest total number of delayed flights. The volume of delays at *EWR* surpasses those at both *JFK* and *LGA.* Newark's high delay count may stem from its larger volume of traffic and greater complexity in managing both domestic and international flights which could significantly contribute to more frequent operational delays. Similarly, *EWR* also leads in the frequency of delays (Fig. 2B), indicating that a significant proportion of flights departing from Newark experience delays.
 
-```{r origindelaycount, echo = FALSE}
+This finding highlights that not only does *EWR* handle a large number of delayed flights, but the percentage of flights delayed relative to the total number of flights is also the highest among the three airports. This suggests that Newark faces chronic issues affecting its punctuality.
+
+```{r origindelaycount}
 flights_origin_count <- flights_data %>%
   group_by(origin) %>%
   filter(was_delayed == TRUE) %>%
@@ -162,13 +186,15 @@ ggplot(data = flights_origin_count, aes(x = origin, y = count, fill = origin)) +
   geom_bar(stat = "identity") +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5)) +
-  labs(title = "(Fig. 2A) Count of Delay by Origin", x = "Origin", y = "Count") + 
+  labs(title = "(Fig. 2A) Count of Delay by Origin",
+       x = "Origin",
+       y = "Count"
+       ) + 
   geom_bar(stat = "identity") +
   geom_text(aes(label = count), vjust = -0.5, size = 4)
 ```
 
-
-```{r origindelayfrequency, echo = FALSE}
+```{r origindelayfrequency}
 flights_origin_freq <- flights_data %>%
   group_by(origin) %>%
   summarise(delayed = sum(was_delayed, na.rm = TRUE),
@@ -178,27 +204,34 @@ flights_origin_freq <- flights_data %>%
 
 ggplot(data = flights_origin_freq, aes(x = origin, y = delay_freq, fill = origin)) +
   geom_bar(stat = "identity") +
-  labs(title = "(Fig. 2B) Frequency of Delay by Origin", x = "Origin", y = "% of Delayed Flights") +
+  labs(title = "(Fig. 2B) Frequency of Delay by Origin",
+       x = "Origin",
+       y = "% of Delayed Flights"
+       ) +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5)) +
   geom_text(aes(label = paste0(delay_freq, "%")), vjust = -0.5, size = 4)
 ```
 
----
+------------------------------------------------------------------------
 
 # Weather Analysis
 
-We will now incorporate **weather** data in our delay analysis. 
+We will now incorporate **weather** data in our delay analysis.
 
 ## 3. Temperature
 
 Our dataset **flights_data** has some rows with 'NA' values for *temp*. For this analysis, those rows will be filtered out.
 
-Fig. 3A reveals that flight delays generally increase in extreme weather conditions. Delays tend to be higher when temperatures drop below 30°F and when they rise above 85°F. These findings suggest that both very cold and very hot temperatures can contribute to disruptions in flight operations, likely due to issues such as de-icing, reduced aircraft performance, or weather-related complications like thunderstorms in high heat. When examining how different airlines are affected by temperature changes, the results show distinct patterns among various carriers (Fig. 3B). Airlines such as Endeavor (*9E*), American Airlines (*AA*), JetBlue (*B6*), Frontier (*F9*), Hawaiian Airlines (*HA*), and US Airways (*US*) exhibit particularly high delays during cold weather (below 30°F). In contrast, carriers like AirTran (*FL*) and SkyWest Airlines (*OO*) tend to experience higher delays in hot temperatures (above 85°F). This suggests that certain airlines may have operational vulnerabilities in extreme weather, possibly due to factors like fleet composition, hub location, or preparedness for adverse weather conditions. The analysis by airport of origin (Fig. 3C) highlights significant differences in how temperature impacts delays. Newark (*EWR*) stands out as the airport most affected by extreme temperatures, showing the greatest change in delay times in both very cold and very hot weather. This may be due to *EWR*'s operational characteristics, weather patterns in its vicinity, or infrastructure challenges. *JFK* and *LGA* also show increased delays in extreme conditions, but the effects are less pronounced than at *EWR*.
+Fig. 3A reveals that flight delays generally increase in extreme weather conditions. Delays tend to be higher when temperatures drop below 30°F and when they rise above 85°F. These findings suggest that both very cold and very hot temperatures can contribute to disruptions in flight operations, likely due to issues such as de-icing, reduced aircraft performance, or weather-related complications like thunderstorms in high heat.
+
+When examining how different airlines are affected by temperature changes, the results show distinct patterns among various carriers (Fig. 3B). Airlines such as Endeavor (*9E*), American Airlines (*AA*), JetBlue (*B6*), Frontier (*F9*), Hawaiian Airlines (*HA*), and US Airways (*US*) exhibit particularly high delays during cold weather (below 30°F). In contrast, carriers like AirTran (*FL*) and SkyWest Airlines (*OO*) tend to experience higher delays in hot temperatures (above 80°F). This suggests that certain airlines may have operational vulnerabilities in extreme weather, possibly due to factors like fleet composition, hub location, or preparedness for adverse weather conditions.
+
+The analysis by airport of origin (Fig. 3C) highlights significant differences in how temperature impacts delays. Newark (*EWR*) stands out as the airport most affected by extreme temperatures, showing the greatest change in delay times in both very cold and very hot weather. This may be due to *EWR*'s operational characteristics, weather patterns in its vicinity, or infrastructure challenges. *JFK* and *LGA* also show increased delays in extreme conditions, but the effects are less pronounced than at *EWR*.
 
 Our findings suggest that flight delays increase significantly in extreme temperatures. The most affected airlines in cold weather (*9E*, *AA*, *B6*, *F9*, *HA*, and *US*) may need to improve their winter operational strategies, while airlines like *FL* and *OO* could benefit from addressing challenges in hot weather conditions. Newark (*EWR*) is the most sensitive to temperature changes, indicating potential for focused improvements in weather-resilient infrastructure or procedures at this airport.
 
-```{r delaytemp, echo = FALSE}
+```{r delaytemp}
 flights_temp_mean <- flights_data %>%
   filter(!is.na(temp)) %>%
   group_by(temp) %>%
@@ -206,12 +239,14 @@ flights_temp_mean <- flights_data %>%
 
 ggplot(data = flights_temp_mean, aes(x = temp, y = mean_dep_delay)) +
   geom_line() +
-  labs(title = "(Fig. 3A) Mean Departure Delay by Temperature", x = "Temperature (°F)", y = "Mean Departure Delay (minutes)") +
+  labs(title = "(Fig. 3A) Mean Departure Delay by Temperature",
+       x = "Temperature (°F)",
+       y = "Mean Departure Delay (minutes)"
+       ) +
   theme_minimal()
 ```
 
-
-```{r delaytempcarrier, echo = FALSE}
+```{r delaytempcarrier}
 # Filter for non-null 'temp' values, group by temp and carrier 
 flights_temp_carrier_mean <- flights_data %>%
   filter(!is.na(temp)) %>%
@@ -222,12 +257,14 @@ flights_temp_carrier_mean <- flights_data %>%
 ggplot(data = flights_temp_carrier_mean, aes(x = temp, y = mean_dep_delay)) +
   geom_line() +
   labs(title = "(Fig. 3B) Mean Departure Delay by Temperature and Carrier", 
-       x = "Temperature (°F)", y = "Mean Departure Delay (minutes)") +
+       x = "Temperature (°F)",
+       y = "Mean Departure Delay (minutes)"
+       ) +
   theme_minimal() +
   facet_wrap(~carrier)
 ```
 
-```{r delaytemporigin, echo = FALSE}
+```{r delaytemporigin}
 # Filter for non-null 'temp' values, group by temp and origin 
 flights_temp_origin_mean <- flights_data %>%
   filter(!is.na(temp)) %>%
@@ -238,19 +275,24 @@ flights_temp_origin_mean <- flights_data %>%
 ggplot(data = flights_temp_origin_mean, aes(x = temp, y = mean_dep_delay)) +
   geom_line() +
   labs(title = "(Fig. 3C) Mean Departure Delay by Temperature and Origin", 
-       x = "Temperature (°F)", y = "Mean Departure Delay (minutes)") +
+       x = "Temperature (°F)",
+       y = "Mean Departure Delay (minutes)"
+       ) +
   theme_minimal() +
   facet_wrap(~origin)
 ```
 
+<br>
 
 ## 4. Precipitation
 
 Our dataset **flights_data** has some rows with 'NA' values for *precip*. For this analysis, those rows will be filtered out.
 
-Fig. 4A shows a clear trend: as precipitation increases, so do flight departure delays. This is expected since rain, snow, and other forms of precipitation can disrupt airport operations, slow down runway traffic, and affect aircraft performance. For instance, wet or icy runways necessitate longer takeoff and landing times, and heavy precipitation often leads to delays in both air traffic control and ground services. However, it’s important to note that the dataset contains relatively few data points for higher precipitation levels. The total number of observations for this analysis is only 55, with much fewer samples in cases of heavy precipitation. This limited data makes it difficult to draw strong conclusions about the exact impact of severe weather on delays, as the trends observed may not fully represent all conditions. The small sample size suggests that while there is a general relationship between precipitation and delays, further data collection would be necessary to make more reliable and detailed observations about the effects of heavy rain or snow on flight departures.
+Fig. 4A shows a clear trend: as precipitation increases, so do flight departure delays. This is expected since rain, snow, and other forms of precipitation can disrupt airport operations, slow down runway traffic, and affect aircraft performance. For instance, wet or icy runways necessitate longer takeoff and landing times, and heavy precipitation often leads to delays in both air traffic control and ground services.
 
-```{r delayprecip, echo = FALSE}
+However, it’s important to note that the dataset contains relatively few data points for higher precipitation levels. The total number of observations for this analysis is only 55 (55 levels of precipitation observed), with much fewer samples in cases of heavy precipitation. This limited data makes it difficult to draw strong conclusions about the exact impact of severe weather on delays, as the trends observed may not fully represent all conditions. The small sample size suggests that while there is a general relationship between precipitation and delays, further data collection would be necessary to make more reliable and detailed observations about the effects of heavy rain or snow on flight departures.
+
+```{r delayprecip}
 flights_precip_mean <- flights_data %>%
   filter(!is.na(precip)) %>%
   group_by(precip) %>%
@@ -260,16 +302,24 @@ dim(flights_precip_mean)
 
 ggplot(data = flights_precip_mean, aes(x = precip, y = mean_dep_delay)) +
   geom_line() +
-  labs(title = "(Fig. 4A) Mean Departure Delay by Precipitation", x = "Precipitation (in)", y = "Mean Departure Delay (minutes)") +
+  labs(title = "(Fig. 4A) Mean Departure Delay by Precipitation",
+       x = "Precipitation (in)",
+       y = "Mean Departure Delay (minutes)"
+       ) +
   theme_minimal()
 ```
 
+<br>
 
 ## 5. Visibility
 
 Our dataset **flights_data** has some rows with 'NA' values for *visib*. For this analysis, those rows will be filtered out.
 
-```{r delayvisib, echo = FALSE}
+Fig. 5A (Mean Departure Delay by Visibility) highlights how visibility levels affect flight departure delays. From the graph, we observe a general trend where reduced visibility correlates with longer departure delays. This pattern aligns with expectations, as lower visibility conditions—such as fog or heavy precipitation—typically disrupt airport operations, requiring more caution during takeoff and landing procedures, which in turn leads to delays. Similarly, higher visibility conditions allow for more on-time departures.
+
+However, it is critical to address the limitations of the dataset used for this analysis. The dataset includes only 20 rows of data (20 observed visibilities), which significantly limits the ability to make strong generalizations or conclusive statements about the impact of visibility on flight delays. A small sample size increases the possibility of statistical noise, meaning that any trends observed might not hold true across a larger, more comprehensive dataset. Therefore, while the current data provides some insight, it lacks the depth and breadth needed for robust conclusions. Expanding the dataset would provide more reliable and statistically significant results.
+
+```{r delayvisib}
 flights_visib_mean <- flights_data %>%
   filter(!is.na(visib)) %>%
   group_by(visib) %>%
@@ -279,25 +329,322 @@ dim(flights_visib_mean)
 
 ggplot(data = flights_visib_mean, aes(x = visib, y = mean_dep_delay)) +
   geom_line() +
-  labs(title = "(Fig. 5A) Mean Departure Delay by Visibility", x = "Visibility (mi)", y = "Mean Departure Delay (minutes)") +
+  labs(title = "(Fig. 5A) Mean Departure Delay by Visibility",
+       x = "Visibility (mi)",
+       y = "Mean Departure Delay (minutes)"
+       ) +
   theme_minimal()
 ```
 
+------------------------------------------------------------------------
+
+# Plane Analysis
+
+We will now incorporate **planes** data in our delay analysis. We will first see if planes manufactured more than a decade ago have greater frequency of delays.
+
+## 6. Year Manufactured
+
+Figure 6A compares the mean departure delay for planes manufactured before and after 2003. Contrary to what one might expect, the analysis reveals that planes manufactured after 2003 experience slightly higher average departure delays compared to those manufactured before 2003. Planes manufactured before 2003 have a mean departure delay of 12.88 minutes, indicating relatively shorter delays while planes manufactured after 2003 show a slightly higher mean departure delay of 13.43 minutes. The difference in the two can be considered negligible, and we can conclude that a planes 'age' has no affect on its expected delay time.
+
+```{r yearmanufactureddelay}
+flights_year_mean <- flights_data %>%
+  filter(!is.na(year_manufactured)) %>%
+  group_by(before_2003 = year_manufactured <= 2003) %>%
+  summarise(dep_delay = round(mean(dep_delay, na.rm = TRUE), 2))
+
+ggplot(data = flights_year_mean, aes(x = before_2003, y = dep_delay, fill = before_2003)) +
+  geom_bar(stat = "identity") +    
+  labs(title = "(Fig. 6A) Mean Departure Delay by Plane Manufacture Year",
+       x = "Year of Manufacture (Before 2003)",
+       y = "Mean Departure Delay (minutes)"
+       ) +
+  theme_minimal() +
+  geom_text(aes(label = dep_delay), stat = "identity", vjust = -0.5, size = 4) +    
+  theme(legend.position = "none")
+```
+
+<br>
+
+## 7. Model
+
+We will now look at different models of aircrafts and their ability to recover departure delay time in transit.
+
+Fig. 7A highlights which plane models are able to recover from a delayed departure and still arrive on time or early. Of all 120 types of planes that flew from NYC, only 6 types were able to make up departure delay time in transit. These were the *737-524*, *737-8FH*, *757-212*, *757-2B7*, *767-201*, and *777-222* (Fig. 7A). Of those, the *757-212* had the earliest average arrival time of 23 minutes ahead of schedule (Fig. 7B). These models likely benefit from better operational efficiency, higher cruising speeds, or optimized flight paths that allow for time recovery. The ability to arrive on time or early despite a late departure is crucial for maintaining overall schedule integrity, especially for airlines with tight schedules or during peak travel seasons. These plane models are particularly valuable in high-stakes situations where connecting flights or turnaround times are critical. Their ability to exceed expectations, even after delays, offers a competitive advantage in maintaining passenger satisfaction and operational efficiency.
+
+Fig. 7D provides an overarching comparison between planes that experience early arrivals and those with mean delays. The results show a clear divide between models that tend to be on time or early after a delayed departure and those that face persistent delays, and highlights models *310Q*, *737-990*, *767-432ER*, *767-324*, *MYSTERE FALCON 900*, and *DC-7BF* as the most notorious for delays even after an on time or early departure. This comparison underlines the need for strategic deployment based on performance in delay-prone scenarios. The contrasting performance highlights that airlines should invest in using more resilient plane models for routes where on-time arrivals are a priority. This ensures minimal schedule disruption, even under challenging conditions.
+
+Fig. 7E introduces a carrier-specific dimension, showing which plane models are most frequently used by major carriers. Interestingly, the analysis reveals that none of the most popular plane models used by these carriers are among the top performers in early arrival after delayed departures. This could suggest that while these planes may be favored for other operational reasons (cost-efficiency, capacity, etc.), they are not the best choice for mitigating the impact of delays. No carrier’s most popular plane model is one of the early arrival leaders in delayed departure scenarios. 
+
+In summation, plane models that manage on-time or early arrivals despite delays (as seen in 7A and 7C) are operationally efficient and should be prioritized for delay-prone routes. Airlines should consider diversifying their fleets to include plane models with better time recovery performance for critical routes. Models that frequently suffer from longer delays (7B) may need to be deployed on less time-sensitive routes. The lack of alignment between the most popular plane models (7E) and the best performers in early arrivals (7C) suggests a missed opportunity for airlines to optimize their fleet based on performance under delay conditions.
+
+```{r earlyarrivedelaydepart}
+flights_model <- flights_data %>%
+  filter(!is.na(model), dep_delay > 0) %>%
+  group_by(model) %>%
+  summarise(arr_delay = mean(arr_delay, na.rm = TRUE))
+
+dim(flights_model)
+
+flights_model_bar <- flights_model %>%
+  filter(arr_delay <= 0)
+
+htmlTable(flights_model_bar, caption = "(Fig. 7A) Models of Planes with On Time or Early Arrival After Late Departure")
+```
+
+```{r barearlyarrivedelaydepart}
+ggplot(data = flights_model_bar, aes(x = model)) +
+  geom_bar(aes(y = arr_delay, fill = "turquoise"),
+           stat = "identity"
+           ) +    
+  labs(title = "(Fig. 7B) Mean Arrival Delay For Delayed Departure Flights by Plane Model", 
+       x = "Plane Model",
+       y = "Mean Arrival Delay (minutes)"
+       ) +
+  theme_minimal() +
+  scale_fill_manual(values = c("turquoise")) +    
+  theme(legend.position = "none")
+```
+
+```{r boxearlyarrivedelaydepart}
+# Filter data for non-null 'model', positive dep_delay
+# and only the plane types who, on average, arrived early or on time after delayed departure
+flights_model_box <- flights_data %>%
+  filter(!is.na(model),
+         dep_delay > 0,
+         model %in% flights_model_bar$model
+         ) %>%
+  group_by(model) %>%
+  mutate(arr_delay = arr_delay)
+
+ggplot(data = flights_model_box, aes(x = model, y = arr_delay)) +
+  geom_boxplot() +    
+  labs(title = "(Fig. 7C) Early Arrivals For Delayed Departure Flights by Plane Model", 
+       x = "Plane Model",
+       y = "Mean Arrival Delay (minutes)"
+       ) +
+  theme_light()
+```
+
+```{r latearriveontimedepart}
+flights_model_box <- flights_data %>%
+  filter(!is.na(model),
+         arr_delay > 0, # delayed arrival
+         dep_delay <= 0 # on time or early departure
+         ) %>%
+  group_by(model) %>%
+  summarise(arr_delay = mean(arr_delay, na.rm = TRUE)) %>%
+  arrange(desc(arr_delay)) # worst models on top
+
+# Select worst 6 models
+flights_model_box_worst6 <- flights_model_box %>%
+  slice(1:6)
+
+flights_model_box_worst6 <- flights_data %>%
+  filter(!is.na(model),
+         dep_delay <= 0,
+         model %in% flights_model_box_worst6$model
+         ) %>%
+  group_by(model) %>%
+  mutate(arr_delay = arr_delay)
+
+ggplot(data = flights_model_box_worst6, aes(x = model, y = arr_delay)) +
+  geom_boxplot() +    
+  labs(title = "(Fig. 7D) Late Arrivals For On-Time or Early Departure Flights by Plane Model", 
+       x = "Plane Model",
+       y = "Mean Arrival Delay (minutes)"
+       ) +
+  theme_light()
+```
+
+```{r planemodelsbycarrier, message = FALSE}
+flights_model_carrier <- flights_data %>%
+  filter(!is.na(model), !is.na(carrier)) %>%
+  group_by(carrier, model) %>%
+  summarise(count = n()) %>%
+  arrange(carrier, desc(count))
+
+flights_model_carrier_top <- flights_model_carrier %>%
+  group_by(carrier) %>%
+  top_n(1) # Select top model per carrier
+
+htmlTable(flights_model_carrier_top, caption = "(Fig. 7E) Most Popular Model For Each Carrier")
+```
+
+<br>
+
+## 8. Number of Engines
+
+We will now explore the relationship between the number of engines on an aircraft and its ability to manage delayed departures, focusing on the recovery time and arrival performance. Specifically, we will examine whether planes with a different number of engines have any significant impact on how well flights recover from late departures and arrive either on time or early.
+
+While three-engine planes showed the best performance in Fig. 8A, with an average arrival time of 11 minutes early, it is important to note that this conclusion is drawn from a small dataset of only 7 data points. One of these planes, the *MYSTERE FALCON 900* (Fig. 8C), was found to be one of the latest arrivals for on-time or early departures in the earlier analysis (**7D**), which complicates the interpretation of its performance. The limited data for three-engine planes suggests that these results might not be fully representative or as reliable as those for planes with more data.
+
+The overwhelming majority of planes in the dataset, with 276,939 values (Fig. 8B), have two engines. These planes showed a solid performance in terms of time recovery but didn’t outperform the three-engine planes in Fig. 8A. However, given the size of the data sample, the results for two-engine planes are more statistically reliable. These planes form the backbone of commercial aviation, with a balance of speed, fuel efficiency, and reliability, making them well-suited for various routes.
+
+There are 1,938 values for one-engine planes and 133 values for four-engine planes (Fig. 8B). The one-engine planes are less common in commercial passenger flights and typically serve specific purposes like cargo or private flights, so their performance is less central to the overall analysis. Four-engine planes, primarily used for long-haul and high-capacity flights, performed less favorably in terms of time recovery. Given the small number of data points for both one-engine and four-engine planes, their statistical significance is limited, and results should be interpreted with caution.
+
+The standout performance of three-engine planes in arriving early may not reflect a general trend due to the very small dataset. Additionally, the fact that the *MYSTERE FALCON 900* was identified as one of the latest arrivals for on-time or early departure flights (**7D**) suggests that even within this limited dataset, the performance of three-engine planes may be inconsistent.
+
+While Fig. 8A shows that three-engine planes had the best performance in terms of recovery from delayed departures, this insight must be taken with caution due to the very small dataset of only 7 values. The results are more reliable for two-engine planes, which dominate the dataset and provide consistent, predictable performance in time recovery. For airlines, the data suggests that two-engine planes remain the most dependable for maintaining schedules, given their large sample size and solid performance. While three-engine planes show promise, further data is needed to draw conclusions about their efficiency.
 
 
+```{r numenginesdelaydep}
+flights_num_engine_bar <- flights_data %>%
+  filter(!is.na(num_engines), dep_delay > 0) %>%
+  group_by(num_engines) %>%
+  summarise(arr_delay = round(mean(arr_delay, na.rm = TRUE), 1))
 
+ggplot(data = flights_num_engine_bar, aes(x = num_engines, y = arr_delay, fill = num_engines)) +
+  geom_bar(stat = "identity") +    
+  labs(title = "(Fig. 8A) Arrival Delay For Delayed Departure Flights by Number of Engines", 
+       x = "Number of Engines",
+       y = "Mean Arrival Delay (minutes)"
+       ) +
+  theme_minimal() +  
+  geom_text(aes(label = arr_delay), stat = "identity", vjust = -0.5, size = 4) +    
+  theme(legend.position = "none")
+```
 
+```{r countvaluesfornumengines}
+num_engines_table <- flights_data %>%
+  filter(num_engines > 0) %>%
+  select(num_engines) %>%
+  group_by(num_engines) %>%
+  summarise(count = n())
 
+htmlTable(num_engines_table, caption = "(Fig. 8B) Frequency of Each Number of Engines")
+```
 
+```{r planeswith3engines}
+models_table <- flights_data %>%
+  filter(num_engines == 3) %>%
+  select(model) %>%
+  group_by(model) %>%
+  summarise(count = n())
 
+htmlTable(models_table, caption = "(Fig. 8C) Models of Three Engine Planes")
+```
 
+<br>
 
+## 9. Engine Type
 
+Fig. 9A shows that Turbo-fan engines dominate the fleet, reflecting their widespread use in modern commercial aviation due to their fuel efficiency and operational flexibility. These engines power a broad range of aircraft, from short-haul to long-haul flights, and are preferred for their ability to balance fuel economy and high thrust. In contrast, Turbo-jet engines are far less common, indicating their use in niche markets such as older aircraft or specific military applications. Turbo-jets are less fuel-efficient and noisier compared to turbo-fans, explaining their reduced presence in commercial fleets.
 
+Fig. 9B highlights that Turbo-jet engines have the lowest mean arrival delay at 26.6 minutes, which is notable given their limited use. Several factors likely contribute:
 
+-   Operational Context: Turbo-jet-powered flights may operate in less congested airports or on shorter routes, reducing their exposure to delays.
 
+-   Flight Characteristics: These engines might be used in specialized aircraft with faster recovery from delays due to fewer passengers or less complex logistics.
 
+Conversely, Turbo-fan engines exhibit slightly higher mean delays, potentially due to:
 
+-   Longer Routes and Utilization: These engines are widely used in larger aircraft on high-traffic, long-haul routes, which are more prone to delays due to air traffic congestion and logistical complexity.
+
+-   Operational Complexity: Larger planes face greater scheduling challenges and longer turnaround times, contributing to their higher delay averages.
+
+The lower delays for turbo-jet engines likely reflect their use in less complex, shorter routes rather than superior engine performance. Turbo-fan engines, despite having higher delays, remain critical to commercial aviation due to their versatility in both short and long-haul operations. The data suggests that engine performance alone doesn't dictate delay recovery; route complexity, airspace congestion, and operational demands also play a significant role. To improve delay management, it is essential to consider how these broader factors intersect with engine type and aircraft operation.
+
+```{r enginetypefrequency}
+engines_table <- flights_data %>%
+  filter(!is.na(engine)) %>%
+  group_by(engine) %>%
+  summarise(count = n())
+
+ggplot(data = engines_table, aes(x = reorder(engine, desc(count)), y = count, fill = engine)) +
+  geom_bar(stat = "identity") +    
+  labs(title = "(Fig. 9A) Frequency of Each Engine Type", 
+       x = "Engine Type",
+       y = "Count of Plane Models",
+       fill = "Engine Type") +
+  theme_minimal() +
+  geom_text(aes(label = count), vjust = -0.5, size = 4) +    
+  theme(legend.position = "none")
+```
+
+```{r engineearlyarriveafterdelaydepart}
+flights_engine_arr_delay <- flights_data %>%
+  filter(!is.na(engine), dep_delay > 0) %>%
+  group_by(engine) %>%
+  summarise(arr_delay = round(mean(arr_delay, na.rm = TRUE), 1))
+
+ggplot(data = flights_engine_arr_delay, aes(x = engine, y = arr_delay, fill = engine)) +
+  geom_bar(stat = "identity") +    
+  labs(title = "(Fig. 9B) Arrival Delay for Delayed Departure Flights by Type of Engines", 
+       x = "Engine Type", y = "Mean Arrival Delay (minutes)") +
+  theme_minimal() +  
+  geom_text(aes(label = arr_delay), stat = "identity", vjust = -0.5, size = 4) +    
+  theme(legend.position = "none")
+```
+
+<br>
+
+## 10. Speed
+
+In Fig. 10A, the relationship between arrival delay and flight speed is explored for flights that departed late. The data shows a noticeable variation in mean arrival delay as speed increases. However, it's important to highlight that there are only 13 unique speed values represented in the dataset, which limits the robustness of the findings. This small sample size makes it difficult to generalize conclusions about the impact of speed on arrival delays across different flights. The figure shows that while some speeds are associated with shorter delays, the overall pattern is not strong enough to establish a clear, reliable relationship due to the limited and potentially non-representative dataset. As such, further investigation with more comprehensive data would be needed to verify any potential trends.
+
+```{r speedarrivalafterdelaydepart}
+flights_speed_arr_delay <- flights_data %>%
+  filter(!is.na(speed), dep_delay > 0) %>%
+  group_by(speed) %>%
+  summarise(arr_delay = mean(arr_delay, na.rm = TRUE))
+
+dim(flights_speed_arr_delay)
+
+# Create the line plot using ggplot
+ggplot(data = flights_speed_arr_delay, aes(x = speed, y = arr_delay)) +
+  geom_line() +    
+  labs(title = "(Fig. 10A) Arrival Delay vs Speed for Delayed Departure Flights", 
+       x = "Speed (MPH)", y = "Mean Arrival Delay (minutes)") +
+  theme_minimal()
+```
+
+------------------------------------------------------------------------
+
+# Conclusion
+
+This study has provided a comprehensive analysis of the factors contributing to flight delays across New York City’s three major airports: John F. Kennedy International (JFK), LaGuardia (LGA), and Newark Liberty International (EWR). By leveraging the nycflights13 dataset, we identified key patterns and trends in flight performance, helping us understand how environmental conditions, aircraft characteristics, and operational challenges interplay to influence punctuality. The results not only confirm existing knowledge about the complexity of air travel delays but also present unique findings with implications for airport management, airlines, and policy planning.
+
+<br>
+
+## Key Findings
+
+1.  *Airport Comparison*: Newark (*EWR*) emerged as the airport with the highest frequency of delays, reflecting its status as a busy hub managing both international and domestic operations. The airport’s dual-function increases operational stress, leading to frequent bottlenecks. In contrast, LaGuardia (*LGA*) and JFK exhibited fewer delays, which could be attributed to better scheduling practices, fewer long-haul disruptions at LGA, and improved international traffic management at *JFK*. However, *JFK*’s high variability in flight volume suggests that even major airports with robust infrastructures remain vulnerable to seasonal surges in demand.
+
+2.  *Weather Impact*: Weather was identified as a significant external factor influencing flight delays. Extreme temperatures—particularly below 30°F or above 85°F—were associated with higher delay probabilities. In winter, operations such as de-icing cause longer ground times, and in summer, heat-induced turbulence can delay departures and arrivals. Moreover, seasonal variability adds complexity to flight schedules, as winter storms or summer thunderstorms can ripple across multiple airports, amplifying delays throughout the network.
+
+3.  *Aircraft Age and Performance*: One of the more surprising insights was that newer aircraft (post-2003) exhibited slightly longer average delays (13.43 minutes) than older planes (12.88 minutes). This finding challenges the assumption that modern aircraft always deliver superior punctuality. The reason might lie in factors like airline scheduling policies or over-reliance on newer aircraft for high-traffic routes, which are more prone to congestion-related delays. A detailed engine analysis showed that while two-engine aircraft remain the most common and consistent performers, three-engine planes recorded the best recovery times, arriving 11 minutes earlier on average than scheduled. However, the limited sample size for three-engine planes makes it difficult to draw robust conclusions about their performance.
+
+<br>
+
+## Implications and Recommendations
+
+The data reveals that delays are shaped by a combination of environmental, infrastructural, and operational factors. To improve punctuality, airlines and airport authorities can adopt several measures:
+
+-   *Dynamic Scheduling*: Adjusting flight schedules based on historical weather patterns and airport congestion trends can mitigate delays.
+
+-   *Data-Driven Maintenance*: Insights from aircraft performance should guide predictive maintenance to ensure optimal fleet readiness.
+
+-   *Resource Allocation*: Airports like Newark, with heavier traffic, could benefit from enhanced air traffic management systems to reduce bottlenecks.
+
+Additionally, this analysis suggests that collaboration among airports, airlines, and meteorological services is essential. Integrating machine learning models to predict delays and disruptions based on multiple variables could further improve decision-making processes.
+
+<br>
+
+## Future Research
+
+The limitations of this study, such as small sample sizes for certain aircraft types and limited time scope (2013), point to areas for future research. Expanding the analysis to multiple years and including more airports would enhance the validity of the findings. Moreover, exploring passenger satisfaction in relation to these delays could provide a more holistic understanding of the impact on airline operations.
+
+---
+
+# Biography
+
+::: {style="text-align: center;"}
+![](IMG_0760.PNG){width="35%"}
+:::
+
+I am **Saransh Rakshak**, a data scientist with a strong foundation in data analysis, machine learning, and programming. I have a Bachelor of Arts in Data Science from the *University of California, Berkeley*, and am currently pursuing a Master of Science in Data Science and Analytics at *Clemson University*. 
+
+I have always been fascinated by airplane engineering and amazed at airports efficiency despite serving high volumes of people. As a result, when I came upon this dataset I was instantly interested!
 
 
 

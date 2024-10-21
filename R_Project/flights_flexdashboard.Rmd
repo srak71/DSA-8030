@@ -13,21 +13,20 @@ runtime: shiny
 library(ggplot2)
 library(nycflights13)
 library(dplyr)
+library(shiny)
 ```
 
-Inputs {.sidebar}
-------------------------------------
+## Inputs {.sidebar}
 
 ```{r}
-
 #choose a variable
 selectInput(inputId = 'Variable', 
             label = 'Select Variable for Histogram', 
             choices = c("distance", "air_time", "dep_delay", "arr_delay"))
-
 ```
 
 ### Histogram Inputs
+
 ```{r}
 
 # slide for bin size
@@ -67,9 +66,7 @@ checkboxInput(inputId = "Horizontal",
 
 ```
 
-
-Row {data-height=215}
--------------------------------
+## Row {data-height="215"}
 
 ### Description of Data
 
@@ -102,10 +99,9 @@ renderUI({
 
 ```
 
-Row {.tabset .tabset-fade}
----------------------------------
+## Row {.tabset .tabset-fade}
 
-### Histogram 
+### Histogram
 
 ```{r}
 #create histogram from inputs
@@ -119,7 +115,6 @@ renderPlot({
 })
 
 ```
-
 
 ### Boxplot
 
