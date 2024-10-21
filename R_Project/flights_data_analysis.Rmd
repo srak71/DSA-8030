@@ -15,8 +15,6 @@ output:
 ![](airport_img.jpg){width="100%"}
 :::
 
-::: {include="C:/Users/sar-home/Clemson/DSA-8030/R_Project/flights_flexdashboard.Rmd"}
-:::
 
 
 ------------------------------------------------------------------------
@@ -28,6 +26,8 @@ Air travel is an essential mode of transportation, with millions of passengers f
 This R project data analysis explores the variables that influence flight delays and flight times for departures from New York City's three major airports: John F. Kennedy (*JFK*), LaGuardia (*LGA*), and Newark (*EWR*). The dataset being used for this analysis is from the *nycflights13* library, which contains detailed information on all flights departing from these airports in 2013 (**flights**), along with corresponding weather conditions (**weather**) and airplane details (**planes**). The data is provided by the *TidyVerse* package, and raw data can be found here: <https://github.com/tidyverse/nycflights13>.
 
 By integrating data on weather (temperature, wind speed, precipitation) and plane characteristics (year of manufacture, model), we aim to uncover patterns and relationships that contribute to delays and extended flight times.
+
+An interactive shiny dashboard for flights data can be downloaded here: <https://github.com/srak71/DSA-8030/blob/main/R_Project/flights_flexdashboard.Rmd>
 
 ------------------------------------------------------------------------
 
