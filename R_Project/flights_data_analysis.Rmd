@@ -55,7 +55,7 @@ Our **flights_data** frame has been cleaned by first removing all rows containin
 # Clean flights data
 flights_data <- flights %>%
   filter(!is.na(dep_delay), !is.na(arr_delay), !is.na(air_time)) %>%
-  mutate(was_delayed = (arr_delay > 0))
+  mutate(was_delayed = (arr_delay > 0 | dep_delay > 0))
 ```
 
 Now, we will join additional data to **flights_data** to add more information for analysis. First, **airlines** is merged on *carrier* to add information about airline names. Next, **weather** data was joined to our **flights_data** dataframe. Prior to this join, **weather**'s column *time_hour* is renamed to *time_hour_weather* to avoid conflicts with **flights** dataframe column *time_hour*. **Weather** is left joined to **flights_data** to preserve data from **flights**, and is joined by columns *year*, *month*, *day*, *hour*, and *origin*. Finally, data regarding details about **planes** for each corresponding flight is joined to our **flights_data**. Prior to this join, **planes** column *year* is renamed to *year_manufactured* to avoid conflicts with **flights** dataframe column *year*. **Planes** is left joined to **flights_data** to preserve data from **flights**, and is joined by *tailnum*.
