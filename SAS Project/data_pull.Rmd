@@ -1,0 +1,36 @@
+---
+title: "fightdatapull"
+output: html_document
+date: "2024-12-09"
+---
+
+```{R}
+# Load required libraries
+library(nycflights13)
+library(dplyr)  # For mutate() and across()
+library(tidyr)  # For replace_na()
+library(readr)  # For write_csv()
+
+# Create a copy of the flights dataset
+flights_processed <- flights
+flights_processed <- flights_processed %>%
+  mutate(across(where(is.character), ~ tidyr::replace_na(., ""))) %>%
+  mutate(across(where(is.numeric), ~ tidyr::replace_na(., as.numeric(NA))))
+write_csv(flights_processed, "flights_processed.csv", na = ".")
+
+weather_cleaned <- weather %>%
+  mutate(across(where(is.character), ~ tidyr::replace_na(., ""))) %>%
+  mutate(across(where(is.numeric), ~ tidyr::replace_na(., 0))) %>%
+  mutate(
+    wind_dir = ifelse(wind_dir %in% c("NA", ""), NA_real_, as.numeric(wind_dir))
+  )
+write_csv(weather_cleaned, "weather_cleaned.csv", na = ".")
+
+planes_cleaned <- planes %>%
+  mutate(across(where(is.character), ~ replace_na(., ""))) %>%
+  mutate(across(where(is.numeric), ~ replace_na(., NA_real_))) %>%
+  mutate(
+    year = ifelse(is.na(year) | year == "NA", NA_integer_, as.integer(year))
+  )
+write_csv(planes_cleaned, "planes_cleaned.csv", na = ".")
+```
