@@ -67,18 +67,14 @@ colnames(airlines)[colnames(airlines) == 'name'] <- 'carrier_name'
 # Join flights with airline data
 flights_data <- flights_data %>%
   left_join(airlines, by = "carrier")
-```
 
-```{r mergeweather}
 # Rename column 'time_hour' in weather to 'time_hour_weather'
 colnames(weather)[colnames(weather) == 'time_hour'] <- 'time_hour_weather'
 
 # Join flights with weather data
 flights_data <- flights_data %>%
   left_join(weather, by = c("year", "month", "day", "hour", "origin"))
-```
 
-```{r mergeplanes}
 # Rename column 'year' in planes to 'year_manufactured'
 colnames(planes)[colnames(planes) == 'year'] <- 'year_manufactured'
 

@@ -16,15 +16,17 @@ flights_processed <- flights
 flights_processed <- flights_processed %>%
   mutate(across(where(is.character), ~ tidyr::replace_na(., ""))) %>%
   mutate(across(where(is.numeric), ~ tidyr::replace_na(., as.numeric(NA))))
-write_csv(flights_processed, "flights_processed.csv", na = ".")
 
-weather_cleaned <- weather %>%
-  mutate(across(where(is.character), ~ tidyr::replace_na(., ""))) %>%
-  mutate(across(where(is.numeric), ~ tidyr::replace_na(., 0))) %>%
-  mutate(
-    wind_dir = ifelse(wind_dir %in% c("NA", ""), NA_real_, as.numeric(wind_dir))
-  )
-write_csv(weather_cleaned, "weather_cleaned.csv", na = ".")
+
+airlines_cleaned <- airlines %>%
+  mutate(across(where(is.character), ~ replace_na(., ""))) %>%
+  mutate(across(where(is.numeric), ~ replace_na(., NA_real_)))
+# Rename column 'name' in airlines to 'carrier_name'
+colnames(airlines_cleaned)[colnames(airlines_cleaned) == 'name'] <- 'carrier_name'
+# Join airline data to flights
+flights_processed <- flights_processed %>%
+  left_join(airlines_cleaned, by = "carrier")
+
 
 planes_cleaned <- planes %>%
   mutate(across(where(is.character), ~ replace_na(., ""))) %>%
@@ -32,5 +34,28 @@ planes_cleaned <- planes %>%
   mutate(
     year = ifelse(is.na(year) | year == "NA", NA_integer_, as.integer(year))
   )
-write_csv(planes_cleaned, "planes_cleaned.csv", na = ".")
+# Rename column 'year' in planes to 'year_manufactured'
+colnames(planes_cleaned)[colnames(planes_cleaned) == 'year'] <- 'year_manufactured'
+# Rename column 'engines' in planes to 'num_engines'
+colnames(planes_cleaned)[colnames(planes_cleaned) == 'engines'] <- 'num_engines'
+# Join plane data to flights
+flights_processed <- flights_processed %>%
+  left_join(planes_cleaned, by = "tailnum")
+
+
+weather_cleaned <- weather %>%
+  mutate(across(where(is.character), ~ tidyr::replace_na(., ""))) %>%
+  mutate(across(where(is.numeric), ~ tidyr::replace_na(., 0))) %>%
+  mutate(
+    wind_dir = ifelse(wind_dir %in% c("NA", ""), NA_real_, as.numeric(wind_dir))
+  )
+# Rename column 'time_hour' in weather to 'time_hour_weather'
+colnames(weather_cleaned)[colnames(weather_cleaned) == 'time_hour'] <- 'time_hour_weather'
+# Join flights with weather data
+flights_processed <- flights_processed %>%
+  left_join(weather_cleaned, by = c("year", "month", "day", "hour", "origin"))
+
+flights_processed
+
+write_csv(flights_processed, "flights_processed.csv", na = ".")
 ```
